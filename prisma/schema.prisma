@@ -1,0 +1,81 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String          @id @default(uuid())
+  name         String
+  email        String          @unique
+  passwordHash String
+  createdAt    DateTime        @default(now())
+  categories   Category[]
+  budgets      MonthlyBudget[]
+  debts        Debt[]
+}
+
+model Category {
+  id          String       @id @default(uuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  nameKey     String       // e.g. "category_bills", "category_expenses", or custom name
+  colorHex    String       // hex representation
+  icon        String       // name of the lucide icon
+  isDefault   Boolean      @default(false)
+  budgetLines BudgetLine[]
+
+  @@unique([userId, nameKey])
+}
+
+model MonthlyBudget {
+  id                String       @id @default(uuid())
+  userId            String
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  year              Int
+  month             Int          // 1 to 12
+  totalBudgetAmount Float        // default configurable budget (e.g. 10000)
+  budgetLines       BudgetLine[]
+
+  @@unique([userId, year, month])
+}
+
+model BudgetLine {
+  id              String        @id @default(uuid())
+  categoryId      String
+  category        Category      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  monthlyBudgetId String
+  monthlyBudget   MonthlyBudget @relation(fields: [monthlyBudgetId], references: [id], onDelete: Cascade)
+  label           String        // e.g. "Eau/Électricité"
+  plannedAmount   Float         @default(0)
+  actualAmount    Float         @default(0)
+  date            DateTime      @default(now())
+}
+
+model Debt {
+  id                 String        @id @default(uuid())
+  userId             String
+  user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name               String        // e.g. "Crédit voiture"
+  monthlyInstallment Float
+  totalAmount        Float?
+  remainingAmount    Float
+  startDate          DateTime      @default(now())
+  estimatedEndDate   DateTime?
+  payments           DebtPayment[]
+}
+
+model DebtPayment {
+  id         String   @id @default(uuid())
+  debtId     String
+  debt       Debt     @relation(fields: [debtId], references: [id], onDelete: Cascade)
+  year       Int
+  month      Int
+  amountPaid Float
+  date       DateTime @default(now())
+
+  @@unique([debtId, year, month])
+}

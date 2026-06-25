@@ -1,0 +1,6 @@
+{
+  "name": "Family Budget Planner",
+  "description": "A professional monthly family budget management application supporting multiple users, custom categories, horizontal-scroll historical view, and complete RTL/LTR localization in French, English, and Arabic.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
