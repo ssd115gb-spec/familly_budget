@@ -126,6 +126,9 @@
     "language": "Langue de l'Interface",
     "currency": "Devise (Affichage)",
     "defaultBudget": "Budget Mensuel par Défaut",
+    "initialSalary": "Salaire Net Initial",
+    "initialSalaryDesc": "Ce montant sera utilisé comme budget initial pour chaque nouveau mois.",
+    "saveSalarySuccess": "Salaire net initial mis à jour !",
     "backupRestore": "Sauvegarde & Restauration",
     "backup": "Exporter les Données (JSON)",
     "restore": "Importer les Données (JSON)",
@@ -137,6 +140,19 @@
     "fr": "Français (LTR)",
     "en": "English (LTR)",
     "restoreSuccess": "Données restaurées avec succès !",
-    "restoreFailed": "Échec de l'importation de la sauvegarde"
+    "restoreFailed": "Échec de l'importation de la sauvegarde",
+    "notificationsTitle": "Préférences de Notification",
+    "notifyBudgetThreshold": "Alertes de Budget Faible",
+    "notifyBudgetThresholdDesc": "Soyez averti lorsque les dépenses atteignent un certain pourcentage du budget prévu.",
+    "notifyUpcomingDebts": "Rappels de Dettes à Venir",
+    "notifyUpcomingDebtsDesc": "Recevez des rappels pour vos mensualités de dettes à venir.",
+    "notifyMonthlySummary": "Aperçus et Résumés Mensuels",
+    "notifyMonthlySummaryDesc": "Recevez un résumé des performances de votre budget à la fin du mois.",
+    "budgetThresholdPercent": "Seuil d'Alerte (%)",
+    "saveNotificationsSuccess": "Préférences de notification mises à jour !",
+    "notifications": "Notifications",
+    "noNotifications": "Aucune notification pour le moment",
+    "markAllAsRead": "Tout marquer comme lu",
+    "clearAll": "Tout effacer"
   }
 }

@@ -4,6 +4,11 @@ interface User {
   id: string;
   name: string;
   email: string;
+  initialSalary?: number;
+  notifyBudgetThreshold?: boolean;
+  budgetThresholdPercent?: number;
+  notifyUpcomingDebts?: boolean;
+  notifyMonthlySummary?: boolean;
 }
 
 interface AppState {

@@ -5,6 +5,8 @@ import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import { PrismaClient } from "@prisma/client";
 import { createServer as createViteServer } from "vite";
+import fs from "fs";
+import { execSync } from "child_process";
 
 const prisma = new PrismaClient();
 const app = express();
@@ -130,6 +132,11 @@ app.post("/api/auth/register", async (req: any, res: any) => {
         id: user.id,
         name: user.name,
         email: user.email,
+        initialSalary: user.initialSalary,
+        notifyBudgetThreshold: user.notifyBudgetThreshold,
+        budgetThresholdPercent: user.budgetThresholdPercent,
+        notifyUpcomingDebts: user.notifyUpcomingDebts,
+        notifyMonthlySummary: user.notifyMonthlySummary,
       },
     });
   } catch (error: any) {
@@ -179,6 +186,11 @@ app.post("/api/auth/login", async (req: any, res: any) => {
         id: user.id,
         name: user.name,
         email: user.email,
+        initialSalary: user.initialSalary,
+        notifyBudgetThreshold: user.notifyBudgetThreshold,
+        budgetThresholdPercent: user.budgetThresholdPercent,
+        notifyUpcomingDebts: user.notifyUpcomingDebts,
+        notifyMonthlySummary: user.notifyMonthlySummary,
       },
     });
   } catch (error: any) {
@@ -225,7 +237,17 @@ app.get("/api/auth/me", authenticateToken, async (req: any, res: any) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.userId },
-      select: { id: true, name: true, email: true, createdAt: true },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        initialSalary: true,
+        notifyBudgetThreshold: true,
+        budgetThresholdPercent: true,
+        notifyUpcomingDebts: true,
+        notifyMonthlySummary: true,
+        createdAt: true,
+      },
     });
 
     if (!user) {
@@ -237,6 +259,333 @@ app.get("/api/auth/me", authenticateToken, async (req: any, res: any) => {
     res.status(500).json({ error: "Server error fetching profile" });
   }
 });
+
+// Update initial net salary
+app.put("/api/user/salary", authenticateToken, async (req: any, res: any) => {
+  try {
+    const userId = req.user.userId;
+    const { initialSalary } = req.body;
+    if (initialSalary === undefined || isNaN(parseFloat(initialSalary))) {
+      return res.status(400).json({ error: "Initial salary must be a valid number" });
+    }
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        initialSalary: parseFloat(initialSalary),
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        initialSalary: true,
+        notifyBudgetThreshold: true,
+        budgetThresholdPercent: true,
+        notifyUpcomingDebts: true,
+        notifyMonthlySummary: true,
+        createdAt: true,
+      },
+    });
+    res.json(updatedUser);
+  } catch (error: any) {
+    console.error("Update salary error:", error);
+    res.status(500).json({ error: "Server error updating initial salary" });
+  }
+});
+
+// Update notification settings
+app.put("/api/user/notification-settings", authenticateToken, async (req: any, res: any) => {
+  try {
+    const userId = req.user.userId;
+    const { notifyBudgetThreshold, budgetThresholdPercent, notifyUpcomingDebts, notifyMonthlySummary } = req.body;
+    
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        notifyBudgetThreshold: notifyBudgetThreshold !== undefined ? !!notifyBudgetThreshold : undefined,
+        budgetThresholdPercent: budgetThresholdPercent !== undefined ? parseFloat(budgetThresholdPercent) : undefined,
+        notifyUpcomingDebts: notifyUpcomingDebts !== undefined ? !!notifyUpcomingDebts : undefined,
+        notifyMonthlySummary: notifyMonthlySummary !== undefined ? !!notifyMonthlySummary : undefined,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        initialSalary: true,
+        notifyBudgetThreshold: true,
+        budgetThresholdPercent: true,
+        notifyUpcomingDebts: true,
+        notifyMonthlySummary: true,
+        createdAt: true,
+      }
+    });
+    res.json(updatedUser);
+  } catch (error: any) {
+    console.error("Update notification settings error:", error);
+    res.status(500).json({ error: "Server error updating notification settings" });
+  }
+});
+
+// Helper function to create notification
+async function createNotification(userId: string, title: string, message: string, type: string) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        notifyBudgetThreshold: true,
+        notifyUpcomingDebts: true,
+        notifyMonthlySummary: true,
+      }
+    });
+    if (!user) return;
+
+    // Check configuration
+    if (type === "BUDGET_WARNING" && !user.notifyBudgetThreshold) return;
+    if (type === "DEBT_REMINDER" && !user.notifyUpcomingDebts) return;
+    if (type === "MONTHLY_SUMMARY" && !user.notifyMonthlySummary) return;
+
+    // Optional: Avoid duplicates in the same day/month for budget warnings/summaries
+    if (type === "BUDGET_WARNING" || type === "MONTHLY_SUMMARY") {
+      const existing = await prisma.notification.findFirst({
+        where: {
+          userId,
+          title,
+          createdAt: {
+            gte: new Date(new Date().setDate(new Date().getDate() - 1)) // within last 24h
+          }
+        }
+      });
+      if (existing) return;
+    }
+
+    await prisma.notification.create({
+      data: {
+        userId,
+        title,
+        message,
+        type,
+      }
+    });
+  } catch (e) {
+    console.error("Error creating notification:", e);
+  }
+}
+
+// Get notifications
+app.get("/api/notifications", authenticateToken, async (req: any, res: any) => {
+  try {
+    const userId = req.user.userId;
+    const notifications = await prisma.notification.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+    });
+    res.json(notifications);
+  } catch (error: any) {
+    res.status(500).json({ error: "Server error fetching notifications" });
+  }
+});
+
+// Mark one as read
+app.put("/api/notifications/:id/read", authenticateToken, async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.userId;
+    await prisma.notification.updateMany({
+      where: { id, userId },
+      data: { read: true },
+    });
+    res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ error: "Server error marking notification as read" });
+  }
+});
+
+// Mark all as read
+app.put("/api/notifications/read-all", authenticateToken, async (req: any, res: any) => {
+  try {
+    const userId = req.user.userId;
+    await prisma.notification.updateMany({
+      where: { userId, read: false },
+      data: { read: true },
+    });
+    res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ error: "Server error marking all notifications as read" });
+  }
+});
+
+// Delete notification
+app.delete("/api/notifications/:id", authenticateToken, async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.userId;
+    await prisma.notification.deleteMany({
+      where: { id, userId }
+    });
+    res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ error: "Server error deleting notification" });
+  }
+});
+
+// Clear all notifications
+app.delete("/api/notifications/clear-all", authenticateToken, async (req: any, res: any) => {
+  try {
+    const userId = req.user.userId;
+    await prisma.notification.deleteMany({
+      where: { userId }
+    });
+    res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ error: "Server error clearing notifications" });
+  }
+});
+
+async function checkBudgetLineThreshold(userId: string, line: any) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        notifyBudgetThreshold: true,
+        budgetThresholdPercent: true,
+      }
+    });
+    if (!user || !user.notifyBudgetThreshold) return;
+
+    const planned = line.plannedAmount;
+    const actual = line.actualAmount;
+    if (planned <= 0) return;
+
+    const ratio = (actual / planned) * 100;
+    const threshold = user.budgetThresholdPercent;
+
+    if (ratio >= 100) {
+      await createNotification(
+        userId,
+        `⚠️ Budget Exceeded: ${line.label}`,
+        `You have exceeded your planned budget for "${line.label}". Planned: ${planned}, Actual: ${actual}.`,
+        "BUDGET_WARNING"
+      );
+    } else if (ratio >= threshold) {
+      await createNotification(
+        userId,
+        `🔔 Budget Warning: ${line.label}`,
+        `You have reached ${ratio.toFixed(0)}% of your planned budget for "${line.label}". Planned: ${planned}, Actual: ${actual}.`,
+        "BUDGET_WARNING"
+      );
+    }
+  } catch (e) {
+    console.error("checkBudgetLineThreshold error:", e);
+  }
+}
+
+async function checkDebtReminders(userId: string) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { notifyUpcomingDebts: true }
+    });
+    if (!user || !user.notifyUpcomingDebts) return;
+
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth() + 1;
+
+    const debts = await prisma.debt.findMany({
+      where: { userId },
+      include: {
+        payments: {
+          where: {
+            year: currentYear,
+            month: currentMonth,
+          }
+        }
+      }
+    });
+
+    for (const debt of debts) {
+      if (debt.remainingAmount > 0 && debt.payments.length === 0) {
+        const notificationTitle = `Debt Payment Due: ${debt.name}`;
+        const existing = await prisma.notification.findFirst({
+          where: {
+            userId,
+            title: notificationTitle,
+            createdAt: {
+              gte: new Date(new Date().setDate(1)) // since first day of current month
+            }
+          }
+        });
+
+        if (!existing) {
+          await createNotification(
+            userId,
+            notificationTitle,
+            `Reminder: Your monthly installment of ${debt.monthlyInstallment} for "${debt.name}" has not been paid yet this month.`,
+            "DEBT_REMINDER"
+          );
+        }
+      }
+    }
+  } catch (e) {
+    console.error("checkDebtReminders error:", e);
+  }
+}
+
+async function checkMonthlySummaryNotification(userId: string, year: number, month: number) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { notifyMonthlySummary: true }
+    });
+    if (!user || !user.notifyMonthlySummary) return;
+
+    let prevMonth = month - 1;
+    let prevYear = year;
+    if (prevMonth === 0) {
+      prevMonth = 12;
+      prevYear = year - 1;
+    }
+
+    const prevBudget = await prisma.monthlyBudget.findUnique({
+      where: {
+        userId_year_month: {
+          userId,
+          year: prevYear,
+          month: prevMonth,
+        }
+      },
+      include: {
+        budgetLines: true,
+      }
+    });
+
+    if (prevBudget && prevBudget.budgetLines.length > 0) {
+      const totalPlanned = prevBudget.budgetLines.reduce((sum, line) => sum + line.plannedAmount, 0);
+      const totalSpent = prevBudget.budgetLines.reduce((sum, line) => sum + line.actualAmount, 0);
+      
+      if (totalPlanned > 0) {
+        const percent = (totalSpent / totalPlanned) * 100;
+        const monthNames = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const monthName = monthNames[prevMonth] || prevMonth.toString();
+        
+        const title = `Monthly Summary: ${monthName} ${prevYear}`;
+        const existing = await prisma.notification.findFirst({
+          where: { userId, title }
+        });
+
+        if (!existing) {
+          await createNotification(
+            userId,
+            title,
+            `In ${monthName}, you planned to spend ${totalPlanned} and spent ${totalSpent} (${percent.toFixed(0)}% of your planned budget).`,
+            "MONTHLY_SUMMARY"
+          );
+        }
+      }
+    }
+  } catch (e) {
+    console.error("checkMonthlySummaryNotification error:", e);
+  }
+}
 
 // ==========================================
 // BUDGETS & LINES API ROUTES
@@ -263,20 +612,31 @@ app.get("/api/budgets/stats", authenticateToken, async (req: any, res: any) => {
       },
     });
 
-    // Default configuration: lookup previous month budget or fallback to 10000 DH
+    // Default configuration: lookup previous month budget or fallback to user initialSalary
     if (!budget) {
-      let defaultAmount = 10000;
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { initialSalary: true },
+      });
+      const userInitialSalary = user?.initialSalary ?? 10000;
+
+      let defaultAmount = userInitialSalary;
       let defaultPassiveIncome = 0;
       let prevPassiveIncomes: any[] = [];
+      let prevBudgetLines: any[] = [];
       
       const prevBudget = await prisma.monthlyBudget.findFirst({
         where: { userId },
         orderBy: [{ year: "desc" }, { month: "desc" }],
       });
       if (prevBudget) {
-        defaultAmount = prevBudget.totalBudgetAmount;
+        // Use initialSalary as the budget initial, and clone previous month details
+        defaultAmount = userInitialSalary;
         defaultPassiveIncome = prevBudget.passiveIncome || 0;
         prevPassiveIncomes = await prisma.passiveIncome.findMany({
+          where: { monthlyBudgetId: prevBudget.id }
+        });
+        prevBudgetLines = await prisma.budgetLine.findMany({
           where: { monthlyBudgetId: prevBudget.id }
         });
       }
@@ -292,6 +652,15 @@ app.get("/api/budgets/stats", authenticateToken, async (req: any, res: any) => {
             create: prevPassiveIncomes.map(pi => ({
               name: pi.name,
               amount: pi.amount
+            }))
+          },
+          budgetLines: {
+            create: prevBudgetLines.map(bl => ({
+              categoryId: bl.categoryId,
+              label: bl.label,
+              plannedAmount: bl.plannedAmount,
+              actualAmount: 0, // Reset actual amount for the new month
+              date: new Date(),
             }))
           }
         },
@@ -329,6 +698,10 @@ app.get("/api/budgets/stats", authenticateToken, async (req: any, res: any) => {
         lines: cat.budgetLines,
       };
     });
+
+    // Trigger notification background checks
+    checkDebtReminders(userId).catch(err => console.error("Error checking debt reminders:", err));
+    checkMonthlySummaryNotification(userId, year, month).catch(err => console.error("Error checking monthly summary:", err));
 
     res.json({
       monthlyBudget: budget,
@@ -539,6 +912,9 @@ app.post("/api/budget-lines", authenticateToken, async (req: any, res: any) => {
       },
     });
 
+    // Check threshold for notifications
+    checkBudgetLineThreshold(userId, line).catch(err => console.error("Error checking line threshold:", err));
+
     res.status(201).json(line);
   } catch (error: any) {
     console.error("Add line error:", error);
@@ -572,6 +948,9 @@ app.put("/api/budget-lines/:id", authenticateToken, async (req: any, res: any) =
         date: date ? new Date(date) : line.date,
       },
     });
+
+    // Check threshold for notifications
+    checkBudgetLineThreshold(userId, updatedLine).catch(err => console.error("Error checking line threshold on update:", err));
 
     res.json(updatedLine);
   } catch (error: any) {
@@ -1141,7 +1520,54 @@ app.post("/api/user/restore", authenticateToken, async (req: any, res: any) => {
 // VITE DEV SERVER / STATIC ASSETS ROUTING
 // ==========================================
 
+async function verifyAndRepairDatabase() {
+  const dbPath = path.join(process.cwd(), "prisma", "dev.db");
+  console.log("Verifying database integrity at:", dbPath);
+  try {
+    // Attempt a simple query
+    await prisma.user.count();
+    console.log("Database connection successful. Schema is valid.");
+  } catch (error: any) {
+    const errorStr = error?.toString() || "";
+    console.error("Database connection check failed:", error);
+    
+    if (
+      errorStr.includes("malformed") || 
+      errorStr.includes("SqliteError") || 
+      errorStr.includes("ConnectorError") ||
+      errorStr.includes("database disk image is malformed")
+    ) {
+      console.warn("Detected malformed or corrupted database. Recreating...");
+      try {
+        // Disconnect first to release any file lock
+        await prisma.$disconnect();
+        
+        if (fs.existsSync(dbPath)) {
+          fs.unlinkSync(dbPath);
+          console.log("Deleted malformed dev.db file.");
+        }
+        
+        // Also delete journal/wal files if they exist
+        const journalPath = `${dbPath}-journal`;
+        const walPath = `${dbPath}-wal`;
+        const shmPath = `${dbPath}-shm`;
+        if (fs.existsSync(journalPath)) fs.unlinkSync(journalPath);
+        if (fs.existsSync(walPath)) fs.unlinkSync(walPath);
+        if (fs.existsSync(shmPath)) fs.unlinkSync(shmPath);
+        
+        console.log("Running prisma db push to recreate database...");
+        execSync("npx prisma db push --accept-data-loss", { stdio: "inherit" });
+        console.log("Database successfully recreated!");
+      } catch (repairError) {
+        console.error("Critical error repairing database:", repairError);
+      }
+    }
+  }
+}
+
 async function startServer() {
+  await verifyAndRepairDatabase();
+
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true },

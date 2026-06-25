@@ -8,14 +8,31 @@ generator client {
 }
 
 model User {
-  id           String          @id @default(uuid())
-  name         String
-  email        String          @unique
-  passwordHash String
-  createdAt    DateTime        @default(now())
-  categories   Category[]
-  budgets      MonthlyBudget[]
-  debts        Debt[]
+  id                    String          @id @default(uuid())
+  name                  String
+  email                 String          @unique
+  passwordHash          String
+  createdAt             DateTime        @default(now())
+  initialSalary         Float           @default(10000.0)
+  notifyBudgetThreshold Boolean         @default(true)
+  budgetThresholdPercent Float          @default(85.0)
+  notifyUpcomingDebts   Boolean         @default(true)
+  notifyMonthlySummary  Boolean         @default(true)
+  categories            Category[]
+  budgets               MonthlyBudget[]
+  debts                 Debt[]
+  notifications         Notification[]
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      String   // "BUDGET_WARNING", "DEBT_REMINDER", "MONTHLY_SUMMARY", "SYSTEM"
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
 }
 
 model Category {

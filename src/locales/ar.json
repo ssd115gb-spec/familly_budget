@@ -126,6 +126,9 @@
     "language": "لغة واجهة الاستخدام",
     "currency": "العملة الرمزية",
     "defaultBudget": "قيمة الميزانية الافتراضية",
+    "initialSalary": "الراتب الصافي الأولي",
+    "initialSalaryDesc": "سيتم استخدام هذا المبلغ كميزانية أولية لكل شهر جديد.",
+    "saveSalarySuccess": "تم تحديث الراتب الصافي الأولي!",
     "backupRestore": "النسخ الاحتياطي واستعادة البيانات",
     "backup": "تصدير نسخة احتياطية (ملف JSON)",
     "restore": "استيراد نسخة احتياطية (ملف JSON)",
@@ -137,6 +140,19 @@
     "fr": "Français (LTR)",
     "en": "English (LTR)",
     "restoreSuccess": "تم استيراد النسخة الاحتياطية بنجاح!",
-    "restoreFailed": "فشل استيراد النسخة الاحتياطية"
+    "restoreFailed": "فشل استيراد النسخة الاحتياطية",
+    "notificationsTitle": "تفضيلات الإشعارات",
+    "notifyBudgetThreshold": "تنبيهات الميزانية المنخفضة",
+    "notifyBudgetThresholdDesc": "احصل على إشعارات عندما تصل المصاريف إلى نسبة مئوية معينة من الميزانية المخططة.",
+    "notifyUpcomingDebts": "تذكيرات الديون القادمة",
+    "notifyUpcomingDebtsDesc": "احصل على تذكير بدفع أقساط الديون الشهرية القادمة.",
+    "notifyMonthlySummary": "ملخصات ورؤى شهرية",
+    "notifyMonthlySummaryDesc": "احصل على ملخص لأداء ميزانيتك في نهاية كل شهر.",
+    "budgetThresholdPercent": "حد التنبيه (%)",
+    "saveNotificationsSuccess": "تم تحديث تفضيلات الإشعارات بنجاح!",
+    "notifications": "الإشعارات",
+    "noNotifications": "لا توجد إشعارات حالياً",
+    "markAllAsRead": "تحديد الكل كمقروء",
+    "clearAll": "حذف الكل"
   }
 }

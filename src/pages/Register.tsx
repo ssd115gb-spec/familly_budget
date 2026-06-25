@@ -67,7 +67,50 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-[85vh] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-violet-50/50 via-indigo-50/30 to-white">
+    <div className="relative min-h-[85vh] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      {/* Animated Background Blobs */}
+      <div className="absolute inset-0 overflow-hidden -z-10 bg-gradient-to-b from-stone-50 via-white to-stone-50/30 dark:from-stone-950 dark:via-stone-900 dark:to-stone-950">
+        <motion.div
+          animate={{
+            x: [0, 80, -40, 0],
+            y: [0, -60, 50, 0],
+            scale: [1, 1.2, 0.9, 1],
+          }}
+          transition={{
+            duration: 15,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="absolute top-1/4 -left-20 w-80 h-80 rounded-full bg-violet-400/20 dark:bg-violet-600/10 blur-3xl"
+        />
+        <motion.div
+          animate={{
+            x: [0, -100, 60, 0],
+            y: [0, 80, -70, 0],
+            scale: [1, 0.85, 1.15, 1],
+          }}
+          transition={{
+            duration: 18,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="absolute bottom-1/4 -right-20 w-96 h-96 rounded-full bg-indigo-300/20 dark:bg-indigo-500/10 blur-3xl"
+        />
+        <motion.div
+          animate={{
+            x: [0, 40, -50, 0],
+            y: [0, 90, -40, 0],
+            scale: [1, 1.1, 0.9, 1],
+          }}
+          transition={{
+            duration: 12,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="absolute top-1/3 right-1/4 w-72 h-72 rounded-full bg-rose-300/15 dark:bg-rose-500/5 blur-3xl"
+        />
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}

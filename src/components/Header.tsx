@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAppStore } from "../store";
 import { apiRequest } from "../api";
+import NotificationsDropdown from "./NotificationsDropdown";
 import {
   Menu,
   X,
@@ -77,13 +78,16 @@ export default function Header() {
       >
         {/* Brand/Logo */}
         <div className="space-y-8">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/20 text-white rounded-2xl backdrop-blur-md">
-              <Wallet className="w-5 h-5 stroke-[2.2]" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white/20 text-white rounded-2xl backdrop-blur-md">
+                <Wallet className="w-5 h-5 stroke-[2.2]" />
+              </div>
+              <span className="font-black text-xl font-display tracking-tight text-white uppercase">
+                {t("common.appName")}
+              </span>
             </div>
-            <span className="font-black text-xl font-display tracking-tight text-white uppercase">
-              {t("common.appName")}
-            </span>
+            <NotificationsDropdown />
           </div>
 
           {/* Navigation links */}
@@ -191,6 +195,7 @@ export default function Header() {
 
           {/* Quick Language or Actions */}
           <div className="flex items-center gap-2">
+            <NotificationsDropdown />
             <button
               onClick={() => setLangDropdownOpen(!langDropdownOpen)}
               className="p-2 text-violet-100 hover:text-white rounded-xl"
