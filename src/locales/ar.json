@@ -65,6 +65,15 @@
     "noBudgetDescription": "ليس لديك ميزانية لهذا الشهر بعد. يمكنك البدء من جديد أو الاستنساخ من شهر سابق.",
     "cloneFrom": "استنساخ من (اختياري)",
     "startFresh": "البدء من جديد",
+    "time": {
+      "recent": "الآن",
+      "minutesAgo": "منذ {{count}} دقيقة",
+      "minutesAgo_plural": "منذ {{count}} دقائق",
+      "hoursAgo": "منذ {{count}} ساعة",
+      "hoursAgo_plural": "منذ {{count}} ساعات",
+      "daysAgo": "منذ {{count}} يوم",
+      "daysAgo_plural": "منذ {{count}} أيام"
+    },
     "categories": {
       "category_bills": "الفواتير والالتزامات الثابتة",
       "category_expenses": "المصاريف اليومية والترفيه",

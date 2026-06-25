@@ -65,6 +65,15 @@
     "noBudgetDescription": "Vous n'avez pas encore de budget pour ce mois-ci. Vous pouvez commencer à zéro ou cloner un mois précédent.",
     "cloneFrom": "Cloner depuis (Optionnel)",
     "startFresh": "Commencer à zéro",
+    "time": {
+      "recent": "À l'instant",
+      "minutesAgo": "il y a {{count}} minute",
+      "minutesAgo_plural": "il y a {{count}} minutes",
+      "hoursAgo": "il y a {{count}} heure",
+      "hoursAgo_plural": "il y a {{count}} heures",
+      "daysAgo": "il y a {{count}} jour",
+      "daysAgo_plural": "il y a {{count}} jours"
+    },
     "categories": {
       "category_bills": "Factures & Charges Fixes",
       "category_expenses": "Dépenses Quotidiennes & Loisirs",

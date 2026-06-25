@@ -483,6 +483,7 @@ async function checkBudgetLineThreshold(userId: string, line: any) {
 const translations = {
   en: {
     debtPaymentDue: "Debt Payment Due: ",
+    debtReminder: "Reminder: Your monthly installment of {{amount}} for \"{{name}}\" has not been paid yet this month.",
     budgetExceeded: "Budget Exceeded: ",
     budgetExceededMessage: "You have exceeded your planned budget for ",
     budgetWarning: "Budget Warning: ",
@@ -494,6 +495,7 @@ const translations = {
   },
   fr: {
     debtPaymentDue: "Paiement de dette dû : ",
+    debtReminder: "Rappel : Votre versement mensuel de {{amount}} pour \"{{name}}\" n'a pas encore été payé ce mois-ci.",
     budgetExceeded: "Budget dépassé : ",
     budgetExceededMessage: "Vous avez dépassé votre budget prévu pour ",
     budgetWarning: "Avertissement de budget : ",
@@ -505,6 +507,7 @@ const translations = {
   },
   ar: {
     debtPaymentDue: "استحقاق سداد الدين: ",
+    debtReminder: "تذكير: دفعتك الشهرية البالغة {{amount}} لـ \"{{name}}\" لم يتم دفعها بعد هذا الشهر.",
     budgetExceeded: "تم تجاوز الميزانية: ",
     budgetExceededMessage: "لقد تجاوزت ميزانيتك المخططة لـ ",
     budgetWarning: "تنبيه الميزانية: ",
@@ -555,12 +558,8 @@ async function checkDebtReminders(userId: string) {
         });
 
         if (!existing) {
-          await createNotification(
-            userId,
-            notificationTitle,
-            `Reminder: Your monthly installment of ${debt.monthlyInstallment} for "${debt.name}" has not been paid yet this month.`,
-            "DEBT_REMINDER"
-          );
+          const message = translations[lang].debtReminder.replace("{{amount}}", debt.monthlyInstallment.toString()).replace("{{name}}", debt.name);
+          await createNotification(userId, notificationTitle, message, "DEBT_REMINDER");
         }
       }
     }
@@ -612,12 +611,8 @@ async function checkMonthlySummaryNotification(userId: string, year: number, mon
         });
 
         if (!existing) {
-          await createNotification(
-            userId,
-            title,
-            `In ${monthName}, you planned to spend ${totalPlanned} and spent ${totalSpent} (${percent.toFixed(0)}% of your planned budget).`,
-            "MONTHLY_SUMMARY"
-          );
+          const message = `${translations[lang].monthlySummaryMessage}${monthName} ${prevYear}: ${percent.toFixed(0)}% ${translations[lang].budgetWarningPercent}`;
+          await createNotification(userId, title, message, "MONTHLY_SUMMARY");
         }
       }
     }

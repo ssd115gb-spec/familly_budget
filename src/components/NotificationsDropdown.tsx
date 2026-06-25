@@ -121,10 +121,10 @@ export default function NotificationsDropdown() {
     const diffHours = Math.floor(diffMins / 60);
     const diffDays = Math.floor(diffHours / 24);
 
-    if (diffMins < 1) return t("dashboard.recent") || "Just now";
-    if (diffMins < 60) return t("dashboard.minutesAgo", { count: diffMins });
-    if (diffHours < 24) return t("dashboard.hoursAgo", { count: diffHours });
-    if (diffDays < 7) return t("dashboard.daysAgo", { count: diffDays });
+    if (diffMins < 1) return t("dashboard.time.recent");
+    if (diffMins < 60) return t("dashboard.time.minutesAgo", { count: diffMins });
+    if (diffHours < 24) return t("dashboard.time.hoursAgo", { count: diffHours });
+    if (diffDays < 7) return t("dashboard.time.daysAgo", { count: diffDays });
     return d.toLocaleDateString(i18n.language, { month: "short", day: "numeric" });
   };
 
@@ -162,8 +162,10 @@ export default function NotificationsDropdown() {
             exit={{ opacity: 0, y: 12, scale: 0.95 }}
             transition={{ duration: 0.15 }}
             className={`absolute top-full mt-2 ${
-              isRtl ? "right-0" : "left-0"
-            } w-[calc(100vw-2rem)] md:w-96 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-2xl overflow-hidden z-50`}
+              isRtl ? "right-0 md:right-0" : "left-0 md:left-0"
+            } ${
+              isRtl ? "right-1/2 translate-x-1/2" : "left-1/2 -translate-x-1/2"
+            } md:left-auto md:right-0 md:translate-x-0 w-[calc(100vw-2rem)] md:w-96 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-2xl overflow-hidden z-50`}
           >
             {/* Header */}
             <div className="px-4 py-3.5 border-b border-stone-150 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-950/20 flex items-center justify-between">
