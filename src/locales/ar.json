@@ -9,6 +9,7 @@
     "actions": "إجراءات",
     "date": "التاريخ",
     "add": "إضافة",
+    "create": "إنشاء",
     "loading": "جاري التحميل...",
     "error": "حدث خطأ ما",
     "success": "تم بنجاح",
@@ -60,6 +61,10 @@
     "budgetDistribution": "توزيع الميزانية المخططة",
     "addPassiveIncome": "إضافة دخل سلبي",
     "noPassiveIncome": "لا يوجد دخل سلبي مسجل لهذا الشهر.",
+    "noBudgetTitle": "إنشاء ميزانية شهرية",
+    "noBudgetDescription": "ليس لديك ميزانية لهذا الشهر بعد. يمكنك البدء من جديد أو الاستنساخ من شهر سابق.",
+    "cloneFrom": "استنساخ من (اختياري)",
+    "startFresh": "البدء من جديد",
     "categories": {
       "category_bills": "الفواتير والالتزامات الثابتة",
       "category_expenses": "المصاريف اليومية والترفيه",

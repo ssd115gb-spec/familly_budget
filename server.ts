@@ -612,62 +612,18 @@ app.get("/api/budgets/stats", authenticateToken, async (req: any, res: any) => {
       },
     });
 
-    // Default configuration: lookup previous month budget or fallback to user initialSalary
     if (!budget) {
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { initialSalary: true },
-      });
-      const userInitialSalary = user?.initialSalary ?? 10000;
-
-      let defaultAmount = userInitialSalary;
-      let defaultPassiveIncome = 0;
-      let prevPassiveIncomes: any[] = [];
-      let prevBudgetLines: any[] = [];
-      
-      const prevBudget = await prisma.monthlyBudget.findFirst({
+      // Return available budgets as sources for cloning
+      const availableBudgets = await prisma.monthlyBudget.findMany({
         where: { userId },
         orderBy: [{ year: "desc" }, { month: "desc" }],
       });
-      if (prevBudget) {
-        // Use initialSalary as the budget initial, and clone previous month details
-        defaultAmount = userInitialSalary;
-        defaultPassiveIncome = prevBudget.passiveIncome || 0;
-        prevPassiveIncomes = await prisma.passiveIncome.findMany({
-          where: { monthlyBudgetId: prevBudget.id }
-        });
-        prevBudgetLines = await prisma.budgetLine.findMany({
-          where: { monthlyBudgetId: prevBudget.id }
-        });
-      }
-
-      budget = await prisma.monthlyBudget.create({
-        data: {
-          userId,
-          year,
-          month,
-          totalBudgetAmount: defaultAmount,
-          passiveIncome: defaultPassiveIncome,
-          passiveIncomes: {
-            create: prevPassiveIncomes.map(pi => ({
-              name: pi.name,
-              amount: pi.amount
-            }))
-          },
-          budgetLines: {
-            create: prevBudgetLines.map(bl => ({
-              categoryId: bl.categoryId,
-              label: bl.label,
-              plannedAmount: bl.plannedAmount,
-              actualAmount: 0, // Reset actual amount for the new month
-              date: new Date(),
-            }))
-          }
-        },
-        include: {
-          passiveIncomes: true,
-        },
+      res.json({
+        monthlyBudget: null,
+        availableBudgets,
+        categories: await prisma.category.findMany({ where: { userId } }),
       });
+      return;
     }
 
     // Ensure categories are fully created
@@ -710,6 +666,79 @@ app.get("/api/budgets/stats", authenticateToken, async (req: any, res: any) => {
   } catch (error: any) {
     console.error("Stats fetching error:", error);
     res.status(500).json({ error: "Server error compiling budget stats" });
+  }
+});
+
+
+// Create Monthly Budget
+app.post("/api/budgets/create", authenticateToken, async (req: any, res: any) => {
+  try {
+    const userId = req.user.userId;
+    const { year, month, sourceMonthlyBudgetId } = req.body;
+
+    if (!year || !month) {
+      return res.status(400).json({ error: "Year and month are required" });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { initialSalary: true },
+    });
+    const userInitialSalary = user?.initialSalary ?? 10000;
+
+    let defaultAmount = userInitialSalary;
+    let defaultPassiveIncome = 0;
+    let prevPassiveIncomes: any[] = [];
+    let prevBudgetLines: any[] = [];
+
+    if (sourceMonthlyBudgetId) {
+      const prevBudget = await prisma.monthlyBudget.findUnique({
+        where: { id: sourceMonthlyBudgetId },
+      });
+      if (prevBudget && prevBudget.userId === userId) {
+        defaultAmount = userInitialSalary;
+        defaultPassiveIncome = prevBudget.passiveIncome || 0;
+        prevPassiveIncomes = await prisma.passiveIncome.findMany({
+          where: { monthlyBudgetId: prevBudget.id }
+        });
+        prevBudgetLines = await prisma.budgetLine.findMany({
+          where: { monthlyBudgetId: prevBudget.id }
+        });
+      }
+    }
+
+    const budget = await prisma.monthlyBudget.create({
+      data: {
+        userId,
+        year,
+        month,
+        totalBudgetAmount: defaultAmount,
+        passiveIncome: defaultPassiveIncome,
+        passiveIncomes: {
+          create: prevPassiveIncomes.map(pi => ({
+            name: pi.name,
+            amount: pi.amount
+          }))
+        },
+        budgetLines: {
+          create: prevBudgetLines.map(bl => ({
+            categoryId: bl.categoryId,
+            label: bl.label,
+            plannedAmount: bl.plannedAmount,
+            actualAmount: 0, // Reset actual amount
+            date: new Date(),
+          }))
+        }
+      },
+      include: {
+        passiveIncomes: true,
+      },
+    });
+
+    res.status(201).json(budget);
+  } catch (error: any) {
+    console.error("Create budget error:", error);
+    res.status(500).json({ error: "Server error creating budget" });
   }
 });
 

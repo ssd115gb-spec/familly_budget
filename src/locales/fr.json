@@ -9,6 +9,7 @@
     "actions": "Actions",
     "date": "Date",
     "add": "Ajouter",
+    "create": "Créer",
     "loading": "Chargement...",
     "error": "Une erreur est survenue",
     "success": "Succès",
@@ -60,6 +61,10 @@
     "budgetDistribution": "Répartition du Budget Prévu",
     "addPassiveIncome": "Ajouter un Revenu Passif",
     "noPassiveIncome": "Aucun revenu passif enregistré pour ce mois.",
+    "noBudgetTitle": "Créer le Budget Mensuel",
+    "noBudgetDescription": "Vous n'avez pas encore de budget pour ce mois-ci. Vous pouvez commencer à zéro ou cloner un mois précédent.",
+    "cloneFrom": "Cloner depuis (Optionnel)",
+    "startFresh": "Commencer à zéro",
     "categories": {
       "category_bills": "Factures & Charges Fixes",
       "category_expenses": "Dépenses Quotidiennes & Loisirs",

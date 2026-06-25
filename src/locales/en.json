@@ -9,6 +9,7 @@
     "actions": "Actions",
     "date": "Date",
     "add": "Add",
+    "create": "Create",
     "loading": "Loading...",
     "error": "An error occurred",
     "success": "Success",
@@ -60,6 +61,10 @@
     "budgetDistribution": "Planned Budget Distribution",
     "addPassiveIncome": "Add Passive Income",
     "noPassiveIncome": "No passive income items registered for this month.",
+    "noBudgetTitle": "Create Monthly Budget",
+    "noBudgetDescription": "You don't have a budget for this month yet. You can start fresh or clone from a previous month.",
+    "cloneFrom": "Clone from (Optional)",
+    "startFresh": "Start Fresh",
     "categories": {
       "category_bills": "Bills & Fixed Charges",
       "category_expenses": "Daily Expenses & Leisure",

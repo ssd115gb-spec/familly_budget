@@ -247,6 +247,48 @@ export default function Dashboard() {
     );
   }
 
+  if (data?.monthlyBudget === null) {
+    return (
+      <div className="max-w-md mx-auto py-20 px-6 text-center space-y-6">
+        <h2 className="text-2xl font-black text-stone-900 dark:text-white font-display">
+          {t("dashboard.noBudgetTitle") || "Create Budget"}
+        </h2>
+        <p className="text-stone-600 dark:text-slate-400">
+          {t("dashboard.noBudgetDescription") || "You don't have a budget for this month yet. You can start fresh or clone from a previous month."}
+        </p>
+        <div className="space-y-4">
+          <label className="block text-sm font-semibold text-stone-700 dark:text-stone-300">
+            {t("dashboard.cloneFrom") || "Clone from (Optional)"}
+          </label>
+          <select 
+            id="sourceBudgetSelect"
+            className="w-full p-3 rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800"
+          >
+            <option value="">{t("dashboard.startFresh") || "Start Fresh"}</option>
+            {data.availableBudgets.map((b: any) => (
+              <option key={b.id} value={b.id}>
+                {t(`history.months.${b.month}`)} {b.year}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={() => {
+              const select = document.getElementById("sourceBudgetSelect") as HTMLSelectElement;
+              const sourceMonthlyBudgetId = select.value;
+              apiRequest("/budgets/create", {
+                method: "POST",
+                body: JSON.stringify({ year, month, sourceMonthlyBudgetId: sourceMonthlyBudgetId || null }),
+              }).then(() => queryClient.invalidateQueries({ queryKey: ["budget-stats"] }));
+            }}
+            className="w-full py-3 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-2xl transition-all"
+          >
+            {t("common.create")}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const initBudget = data?.monthlyBudget?.totalBudgetAmount || 0;
   const passiveIncomesList = data?.monthlyBudget?.passiveIncomes || [];
   const passiveIncome = passiveIncomesList.reduce((acc: number, pi: any) => acc + (pi.amount || 0), 0);

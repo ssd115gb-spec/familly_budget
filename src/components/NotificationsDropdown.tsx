@@ -122,9 +122,9 @@ export default function NotificationsDropdown() {
     const diffDays = Math.floor(diffHours / 24);
 
     if (diffMins < 1) return t("dashboard.recent") || "Just now";
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
+    if (diffMins < 60) return t("dashboard.minutesAgo", { count: diffMins });
+    if (diffHours < 24) return t("dashboard.hoursAgo", { count: diffHours });
+    if (diffDays < 7) return t("dashboard.daysAgo", { count: diffDays });
     return d.toLocaleDateString(i18n.language, { month: "short", day: "numeric" });
   };
 
@@ -161,7 +161,9 @@ export default function NotificationsDropdown() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 12, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className={`absolute top-full mt-2 left-0 w-[calc(100vw-2rem)] md:w-96 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-2xl overflow-hidden z-50`}
+            className={`absolute top-full mt-2 ${
+              isRtl ? "right-0" : "left-0"
+            } w-[calc(100vw-2rem)] md:w-96 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-2xl overflow-hidden z-50`}
           >
             {/* Header */}
             <div className="px-4 py-3.5 border-b border-stone-150 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-950/20 flex items-center justify-between">
@@ -171,7 +173,7 @@ export default function NotificationsDropdown() {
                 </span>
                 {unreadCount > 0 && (
                   <span className="px-2 py-0.5 bg-violet-100 dark:bg-violet-950/30 text-violet-600 dark:text-violet-400 text-[10px] font-black rounded-full">
-                    {unreadCount} {t("dashboard.recent") ? "" : "new"}
+                    {unreadCount} {t("dashboard.new")}
                   </span>
                 )}
               </div>
@@ -243,7 +245,7 @@ export default function NotificationsDropdown() {
                         <button
                           onClick={() => markReadMutation.mutate(notif.id)}
                           className="p-1 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-md text-emerald-600 dark:text-emerald-400 transition-colors cursor-pointer"
-                          title="Mark as read"
+                          title={t("settings.markAsRead")}
                         >
                           <Check className="w-3.5 h-3.5" />
                         </button>
@@ -251,7 +253,7 @@ export default function NotificationsDropdown() {
                       <button
                         onClick={() => deleteMutation.mutate(notif.id)}
                         className="p-1 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-md text-rose-500 transition-colors cursor-pointer"
-                        title="Delete"
+                        title={t("settings.delete")}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
