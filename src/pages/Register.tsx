@@ -67,7 +67,7 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-[85vh] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-emerald-50/50 via-teal-50/30 to-white">
+    <div className="min-h-[85vh] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-violet-50/50 via-indigo-50/30 to-white">
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
@@ -75,10 +75,10 @@ export default function Register() {
         className="sm:mx-auto sm:w-full sm:max-w-md text-center"
       >
         <div className="inline-flex justify-center items-center gap-3 font-display font-black text-3.5xl tracking-tight mb-3">
-          <div className="p-2 bg-emerald-600 text-white rounded-2xl shadow-xl shadow-emerald-500/10">
+          <div className="p-2 bg-violet-600 text-white rounded-2xl shadow-xl shadow-violet-500/10">
             <Wallet className="w-8 h-8 stroke-[2.2]" />
           </div>
-          <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">{t("common.appName")}</span>
+          <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">{t("common.appName")}</span>
         </div>
         <h2 className="text-center text-2xl font-black font-display text-stone-900 tracking-tight">
           {t("auth.register")}
@@ -115,10 +115,10 @@ export default function Register() {
                 <input
                   type="text"
                   {...register("name")}
-                  className={`block w-full ps-11 pe-4 py-2.5 rounded-2xl border bg-stone-50/50 text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
+                  className={`block w-full ps-11 pe-4 py-2.5 rounded-2xl border bg-stone-50/50 text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all ${
                     errors.name
                       ? "border-rose-300 focus:ring-rose-500"
-                      : "border-stone-200 focus:border-emerald-500"
+                      : "border-stone-200 focus:border-violet-500"
                   }`}
                   placeholder="Mohammed Alami"
                 />
@@ -140,10 +140,10 @@ export default function Register() {
                 <input
                   type="email"
                   {...register("email")}
-                  className={`block w-full ps-11 pe-4 py-2.5 rounded-2xl border bg-stone-50/50 text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
+                  className={`block w-full ps-11 pe-4 py-2.5 rounded-2xl border bg-stone-50/50 text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all ${
                     errors.email
                       ? "border-rose-300 focus:ring-rose-500"
-                      : "border-stone-200 focus:border-emerald-500"
+                      : "border-stone-200 focus:border-violet-500"
                   }`}
                   placeholder="ex@email.com"
                 />
@@ -165,10 +165,10 @@ export default function Register() {
                 <input
                   type="password"
                   {...register("password")}
-                  className={`block w-full ps-11 pe-4 py-2.5 rounded-2xl border bg-stone-50/50 text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
+                  className={`block w-full ps-11 pe-4 py-2.5 rounded-2xl border bg-stone-50/50 text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all ${
                     errors.password
                       ? "border-rose-300 focus:ring-rose-500"
-                      : "border-stone-200 focus:border-emerald-500"
+                      : "border-stone-200 focus:border-violet-500"
                   }`}
                   placeholder="••••••••"
                 />
@@ -190,10 +190,10 @@ export default function Register() {
                 <input
                   type="password"
                   {...register("confirmPassword")}
-                  className={`block w-full ps-11 pe-4 py-2.5 rounded-2xl border bg-stone-50/50 text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
+                  className={`block w-full ps-11 pe-4 py-2.5 rounded-2xl border bg-stone-50/50 text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all ${
                     errors.confirmPassword
                       ? "border-rose-300 focus:ring-rose-500"
-                      : "border-stone-200 focus:border-emerald-500"
+                      : "border-stone-200 focus:border-violet-500"
                   }`}
                   placeholder="••••••••"
                 />
@@ -207,7 +207,7 @@ export default function Register() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex justify-center items-center gap-2 py-3.5 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider font-display transition-all cursor-pointer disabled:opacity-50 mt-4 shadow-md shadow-emerald-500/10"
+              className="w-full flex justify-center items-center gap-2 py-3.5 px-4 rounded-2xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs uppercase tracking-wider font-display transition-all cursor-pointer disabled:opacity-50 mt-4 shadow-md shadow-violet-500/10"
             >
               {loading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -224,7 +224,7 @@ export default function Register() {
           <div className="mt-6 text-center border-t border-stone-150 pt-5">
             <Link
               to="/login"
-              className="text-xs font-bold uppercase tracking-wider font-display text-emerald-600 hover:text-emerald-500 transition-colors"
+              className="text-xs font-bold uppercase tracking-wider font-display text-violet-600 hover:text-violet-500 transition-colors"
             >
               {t("auth.hasAccount")}
             </Link>

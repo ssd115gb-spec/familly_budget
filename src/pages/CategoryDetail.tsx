@@ -150,7 +150,7 @@ export default function CategoryDetail() {
   if (isLoading) {
     return (
       <div className="h-[60vh] flex flex-col justify-center items-center gap-3">
-        <Loader2 className="w-10 h-10 animate-spin text-emerald-600" />
+        <Loader2 className="w-10 h-10 animate-spin text-violet-600" />
         <span className="text-gray-500 font-medium text-sm">{t("common.loading")}</span>
       </div>
     );
@@ -201,7 +201,7 @@ export default function CategoryDetail() {
         {/* Add Line Action */}
         <button
           onClick={() => setIsAddLineOpen(true)}
-          className="flex items-center justify-center gap-2 px-4.5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-bold text-xs uppercase tracking-wider font-display transition-all shadow-md shadow-emerald-500/10 cursor-pointer self-start sm:self-auto"
+          className="flex items-center justify-center gap-2 px-4.5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-2xl font-bold text-xs uppercase tracking-wider font-display transition-all shadow-md shadow-violet-500/10 cursor-pointer self-start sm:self-auto"
         >
           <Plus className="w-4.5 h-4.5 stroke-[2.2]" />
           <span>{t("category_detail.addSubItem")}</span>
@@ -328,7 +328,7 @@ export default function CategoryDetail() {
               required
               value={lineLabel}
               onChange={(e) => setLineLabel(e.target.value)}
-              className="block w-full px-4 py-3 rounded-2xl border border-stone-200 dark:border-slate-800 bg-stone-50/50 dark:bg-slate-950/40 text-stone-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-stone-900 dark:focus:ring-emerald-500 transition-all"
+              className="block w-full px-4 py-3 rounded-2xl border border-stone-200 dark:border-slate-800 bg-stone-50/50 dark:bg-slate-950/40 text-stone-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all"
               placeholder="ex: Wifi Fiber"
             />
           </div>
@@ -344,7 +344,7 @@ export default function CategoryDetail() {
                 required
                 value={linePlanned}
                 onChange={(e) => setLinePlanned(e.target.value)}
-                className="block w-full px-4 py-3 rounded-2xl border border-stone-200 dark:border-slate-800 bg-stone-50/50 dark:bg-slate-950/40 text-stone-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-stone-900 dark:focus:ring-emerald-500 transition-all"
+                className="block w-full px-4 py-3 rounded-2xl border border-stone-200 dark:border-slate-800 bg-stone-50/50 dark:bg-slate-950/40 text-stone-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all"
                 placeholder="250"
               />
             </div>
@@ -358,7 +358,7 @@ export default function CategoryDetail() {
                 required
                 value={lineActual}
                 onChange={(e) => setLineActual(e.target.value)}
-                className="block w-full px-4 py-3 rounded-2xl border border-stone-200 dark:border-slate-800 bg-stone-50/50 dark:bg-slate-950/40 text-stone-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-stone-900 dark:focus:ring-emerald-500 transition-all"
+                className="block w-full px-4 py-3 rounded-2xl border border-stone-200 dark:border-slate-800 bg-stone-50/50 dark:bg-slate-950/40 text-stone-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all"
                 placeholder="0"
               />
             </div>
@@ -373,14 +373,14 @@ export default function CategoryDetail() {
               required
               value={lineDate}
               onChange={(e) => setLineDate(e.target.value)}
-              className="block w-full px-4 py-3 rounded-2xl border border-stone-200 dark:border-slate-800 bg-stone-50/50 dark:bg-slate-950/40 text-stone-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-stone-900 dark:focus:ring-emerald-500 transition-all"
+              className="block w-full px-4 py-3 rounded-2xl border border-stone-200 dark:border-slate-800 bg-stone-50/50 dark:bg-slate-950/40 text-stone-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all"
             />
           </div>
 
           <button
             type="submit"
             disabled={addLineMutation.isPending}
-            className="w-full py-3.5 px-4 bg-stone-900 hover:bg-stone-850 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white dark:text-slate-950 font-bold text-xs uppercase tracking-wider font-display rounded-2xl transition-all cursor-pointer"
+            className="w-full py-3.5 px-4 bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs uppercase tracking-wider font-display rounded-2xl transition-all cursor-pointer"
           >
             {addLineMutation.isPending ? t("common.loading") : t("common.add")}
           </button>
@@ -403,7 +403,7 @@ export default function CategoryDetail() {
               required
               value={lineLabel}
               onChange={(e) => setLineLabel(e.target.value)}
-              className="block w-full px-4 py-3 rounded-2xl border border-stone-200 dark:border-slate-800 bg-stone-50/50 dark:bg-slate-950/40 text-stone-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-stone-900 dark:focus:ring-emerald-500 transition-all"
+              className="block w-full px-4 py-3 rounded-2xl border border-stone-200 dark:border-slate-800 bg-stone-50/50 dark:bg-slate-950/40 text-stone-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all"
             />
           </div>
 
@@ -418,7 +418,7 @@ export default function CategoryDetail() {
                 required
                 value={linePlanned}
                 onChange={(e) => setLinePlanned(e.target.value)}
-                className="block w-full px-4 py-3 rounded-2xl border border-stone-200 dark:border-slate-800 bg-stone-50/50 dark:bg-slate-950/40 text-stone-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-stone-900 dark:focus:ring-emerald-500 transition-all"
+                className="block w-full px-4 py-3 rounded-2xl border border-stone-200 dark:border-slate-800 bg-stone-50/50 dark:bg-slate-950/40 text-stone-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all"
               />
             </div>
             <div>
@@ -431,7 +431,7 @@ export default function CategoryDetail() {
                 required
                 value={lineActual}
                 onChange={(e) => setLineActual(e.target.value)}
-                className="block w-full px-4 py-3 rounded-2xl border border-stone-200 dark:border-slate-800 bg-stone-50/50 dark:bg-slate-950/40 text-stone-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-stone-900 dark:focus:ring-emerald-500 transition-all"
+                className="block w-full px-4 py-3 rounded-2xl border border-stone-200 dark:border-slate-800 bg-stone-50/50 dark:bg-slate-950/40 text-stone-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all"
               />
             </div>
           </div>
@@ -445,14 +445,14 @@ export default function CategoryDetail() {
               required
               value={lineDate}
               onChange={(e) => setLineDate(e.target.value)}
-              className="block w-full px-4 py-3 rounded-2xl border border-stone-200 dark:border-slate-800 bg-stone-50/50 dark:bg-slate-950/40 text-stone-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-stone-900 dark:focus:ring-emerald-500 transition-all"
+              className="block w-full px-4 py-3 rounded-2xl border border-stone-200 dark:border-slate-800 bg-stone-50/50 dark:bg-slate-950/40 text-stone-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all"
             />
           </div>
 
           <button
             type="submit"
             disabled={editLineMutation.isPending}
-            className="w-full py-3.5 px-4 bg-stone-900 hover:bg-stone-850 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white dark:text-slate-950 font-bold text-xs uppercase tracking-wider font-display rounded-2xl transition-all cursor-pointer"
+            className="w-full py-3.5 px-4 bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs uppercase tracking-wider font-display rounded-2xl transition-all cursor-pointer"
           >
             {editLineMutation.isPending ? t("common.loading") : t("common.save")}
           </button>

@@ -25,6 +25,7 @@ import {
   TrendingUp,
   Loader2,
   Calendar,
+  Trash2,
 } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 
@@ -53,6 +54,7 @@ export default function Dashboard() {
 
   // Form states
   const [newBudgetAmount, setNewBudgetAmount] = useState("");
+  const [newPassiveIncome, setNewPassiveIncome] = useState("");
   const [expenseLabel, setExpenseLabel] = useState("");
   const [expenseAmount, setExpenseAmount] = useState("");
   const [expenseCatId, setExpenseCatId] = useState("");
@@ -66,10 +68,10 @@ export default function Dashboard() {
 
   // Mutate budget amount
   const updateBudgetMutation = useMutation({
-    mutationFn: (amount: number) =>
+    mutationFn: ({ totalBudgetAmount, passiveIncome }: { totalBudgetAmount: number; passiveIncome: number }) =>
       apiRequest("/budgets/amount", {
         method: "PUT",
-        body: JSON.stringify({ year, month, totalBudgetAmount: amount }),
+        body: JSON.stringify({ year, month, totalBudgetAmount, passiveIncome }),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["budget-stats"] });
@@ -94,6 +96,88 @@ export default function Dashboard() {
     },
   });
 
+  // Passive income modal and form states
+  const [isPassiveIncomeModalOpen, setIsPassiveIncomeModalOpen] = useState(false);
+  const [editingPassiveIncome, setEditingPassiveIncome] = useState<any>(null);
+  const [piName, setPiName] = useState("");
+  const [piAmount, setPiAmount] = useState("");
+
+  // Passive income mutations
+  const addPassiveIncomeMutation = useMutation({
+    mutationFn: (body: { name: string; amount: number; monthlyBudgetId: string }) =>
+      apiRequest("/budgets/passive-income", {
+        method: "POST",
+        body: JSON.stringify(body),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["budget-stats"] });
+      setIsPassiveIncomeModalOpen(false);
+      setPiName("");
+      setPiAmount("");
+    },
+  });
+
+  const updatePassiveIncomeMutation = useMutation({
+    mutationFn: (body: { id: string; name: string; amount: number }) =>
+      apiRequest(`/budgets/passive-income/${body.id}`, {
+        method: "PUT",
+        body: JSON.stringify({ name: body.name, amount: body.amount }),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["budget-stats"] });
+      setIsPassiveIncomeModalOpen(false);
+      setEditingPassiveIncome(null);
+      setPiName("");
+      setPiAmount("");
+    },
+  });
+
+  const deletePassiveIncomeMutation = useMutation({
+    mutationFn: (id: string) =>
+      apiRequest(`/budgets/passive-income/${id}`, {
+        method: "DELETE",
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["budget-stats"] });
+    },
+  });
+
+  const handleOpenAddPassiveIncome = () => {
+    setEditingPassiveIncome(null);
+    setPiName("");
+    setPiAmount("");
+    setIsPassiveIncomeModalOpen(true);
+  };
+
+  const handleOpenEditPassiveIncome = (pi: any) => {
+    setEditingPassiveIncome(pi);
+    setPiName(pi.name);
+    setPiAmount(pi.amount.toString());
+    setIsPassiveIncomeModalOpen(true);
+  };
+
+  const handleSavePassiveIncome = (e: React.FormEvent) => {
+    e.preventDefault();
+    const amountNum = parseFloat(piAmount);
+    if (!piName.trim() || isNaN(amountNum) || amountNum < 0) return;
+
+    if (editingPassiveIncome) {
+      updatePassiveIncomeMutation.mutate({
+        id: editingPassiveIncome.id,
+        name: piName,
+        amount: amountNum,
+      });
+    } else {
+      const budgetId = data?.monthlyBudget?.id;
+      if (!budgetId) return;
+      addPassiveIncomeMutation.mutate({
+        name: piName,
+        amount: amountNum,
+        monthlyBudgetId: budgetId,
+      });
+    }
+  };
+
   const handlePrevMonth = () => {
     if (month === 1) {
       setMonth(12);
@@ -115,6 +199,9 @@ export default function Dashboard() {
   const handleEditBudget = () => {
     if (data?.monthlyBudget) {
       setNewBudgetAmount(data.monthlyBudget.totalBudgetAmount.toString());
+      const passiveIncomesList = data.monthlyBudget.passiveIncomes || [];
+      const computedPassive = passiveIncomesList.reduce((acc: number, pi: any) => acc + (pi.amount || 0), 0);
+      setNewPassiveIncome(computedPassive.toString());
       setIsEditBudgetOpen(true);
     }
   };
@@ -122,8 +209,10 @@ export default function Dashboard() {
   const handleSaveBudget = (e: React.FormEvent) => {
     e.preventDefault();
     const amount = parseFloat(newBudgetAmount);
+    const passiveIncomesList = data?.monthlyBudget?.passiveIncomes || [];
+    const computedPassive = passiveIncomesList.reduce((acc: number, pi: any) => acc + (pi.amount || 0), 0);
     if (!isNaN(amount) && amount >= 0) {
-      updateBudgetMutation.mutate(amount);
+      updateBudgetMutation.mutate({ totalBudgetAmount: amount, passiveIncome: computedPassive });
     }
   };
 
@@ -152,13 +241,16 @@ export default function Dashboard() {
   if (isLoading) {
     return (
       <div className="h-[60vh] flex flex-col justify-center items-center gap-3">
-        <Loader2 className="w-10 h-10 animate-spin text-emerald-600" />
+        <Loader2 className="w-10 h-10 animate-spin text-violet-600" />
         <span className="text-gray-500 font-medium text-sm">{t("common.loading")}</span>
       </div>
     );
   }
 
-  const budget = data?.monthlyBudget?.totalBudgetAmount || 0;
+  const initBudget = data?.monthlyBudget?.totalBudgetAmount || 0;
+  const passiveIncomesList = data?.monthlyBudget?.passiveIncomes || [];
+  const passiveIncome = passiveIncomesList.reduce((acc: number, pi: any) => acc + (pi.amount || 0), 0);
+  const budget = initBudget + passiveIncome;
   const categories = data?.categories || [];
 
   // Calculate totals
@@ -209,54 +301,117 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Grand Card: "Chhal Bqa Lik Tasraf" */}
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden bg-gradient-to-br from-emerald-500 via-teal-500 to-emerald-600 text-white p-6 sm:p-8 rounded-[28px] shadow-xl shadow-emerald-500/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6"
-      >
-        {/* Subtle accent glow */}
-        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-gradient-to-br from-white/10 to-teal-500/0 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="space-y-2.5 relative z-10">
-          <p className="text-emerald-100/80 font-bold text-[11px] uppercase tracking-widest font-display">
-            {t("dashboard.remainingBudget")}
-          </p>
-          <h2 className="text-4xl sm:text-5xl font-black tracking-tight font-display bg-gradient-to-r from-white via-white to-emerald-100 bg-clip-text text-transparent">
-            {formatCurrency(remaining, currency, i18n.language)}
-          </h2>
-          <div className="flex items-center gap-2 text-emerald-100/95 text-xs font-semibold pt-1">
-            <span className="bg-white/20 px-2 py-0.5 rounded-lg font-mono text-white font-bold tracking-wide">
-              {remainingPercent.toFixed(0)}%
-            </span>
-            <span className="font-display tracking-wide">{t("common.appName")} &mdash; Budget Manager</span>
+      {/* 4 Beautiful Colored Cards matching the Mockup */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Card 1: Purple (Base Budget) */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="relative overflow-hidden bg-gradient-to-br from-indigo-500 to-violet-600 text-white p-6 rounded-3xl shadow-lg shadow-violet-500/10 flex flex-col justify-between h-[140px] group"
+        >
+          <div className="absolute -top-6 -right-6 w-24 h-24 bg-white/10 rounded-full blur-xl group-hover:scale-125 transition-transform" />
+          <div className="flex justify-between items-start">
+            <div className="p-2.5 bg-white/15 rounded-full backdrop-blur-md">
+              <PiggyBank className="w-5 h-5 text-white stroke-[2.2]" />
+            </div>
+            <button
+              onClick={handleEditBudget}
+              className="p-1.5 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all cursor-pointer z-10"
+              title={t("dashboard.editBudget")}
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+            </button>
           </div>
-        </div>
+          <div className="space-y-1">
+            <p className="text-violet-100/80 text-[10px] font-extrabold uppercase tracking-widest font-display">
+              {t("dashboard.initBudget") || "Base Budget"}
+            </p>
+            <h4 className="text-xl sm:text-2xl font-black font-display tracking-tight text-white">
+              {formatCurrency(initBudget, currency, i18n.language)}
+            </h4>
+          </div>
+        </motion.div>
 
-        {/* Side statistics */}
-        <div className="flex gap-8 sm:gap-14 w-full md:w-auto border-t border-emerald-400/20 md:border-t-0 pt-5 md:pt-0 relative z-10">
-          <div>
-            <p className="text-emerald-100/80 text-[10px] font-bold uppercase tracking-widest mb-1.5 font-display">{t("dashboard.totalBudget")}</p>
-            <div className="flex items-center gap-2">
-              <span className="text-xl sm:text-2xl font-black font-display tracking-tight text-white">
-                {formatCurrency(budget, currency, i18n.language)}
-              </span>
-              <button
-                onClick={handleEditBudget}
-                className="p-1.5 bg-white/10 hover:bg-white/20 rounded-xl text-emerald-50 hover:text-white transition-all cursor-pointer"
-              >
-                <Edit3 className="w-4 h-4 stroke-[2]" />
-              </button>
+        {/* Card 2: Blue (Passive Income) */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="relative overflow-hidden bg-gradient-to-br from-sky-400 to-blue-600 text-white p-6 rounded-3xl shadow-lg shadow-blue-500/10 flex flex-col justify-between h-[140px] group"
+        >
+          <div className="absolute -top-6 -right-6 w-24 h-24 bg-white/10 rounded-full blur-xl group-hover:scale-125 transition-transform" />
+          <div className="flex justify-between items-start">
+            <div className="p-2.5 bg-white/15 rounded-full backdrop-blur-md">
+              <TrendingUp className="w-5 h-5 text-white stroke-[2.2]" />
+            </div>
+            <button
+              onClick={handleOpenAddPassiveIncome}
+              className="p-1.5 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all cursor-pointer z-10"
+              title={t("dashboard.addPassiveIncome")}
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          <div className="space-y-1">
+            <p className="text-blue-100/80 text-[10px] font-extrabold uppercase tracking-widest font-display">
+              {t("dashboard.passiveIncome")}
+            </p>
+            <h4 className="text-xl sm:text-2xl font-black font-display tracking-tight text-white">
+              {formatCurrency(passiveIncome, currency, i18n.language)}
+            </h4>
+          </div>
+        </motion.div>
+
+        {/* Card 3: Red (Total Spent) */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="relative overflow-hidden bg-gradient-to-br from-rose-400 to-pink-600 text-white p-6 rounded-3xl shadow-lg shadow-rose-500/10 flex flex-col justify-between h-[140px] group"
+        >
+          <div className="absolute -top-6 -right-6 w-24 h-24 bg-white/10 rounded-full blur-xl group-hover:scale-125 transition-transform" />
+          <div className="flex justify-between items-start">
+            <div className="p-2.5 bg-white/15 rounded-full backdrop-blur-md">
+              <CreditCard className="w-5 h-5 text-white stroke-[2.2]" />
             </div>
           </div>
-          <div>
-            <p className="text-emerald-100/80 text-[10px] font-bold uppercase tracking-widest mb-1.5 font-display">{t("dashboard.totalSpent")}</p>
-            <span className="text-xl sm:text-2xl font-black font-display tracking-tight text-white">
+          <div className="space-y-1">
+            <p className="text-rose-100/80 text-[10px] font-extrabold uppercase tracking-widest font-display">
+              {t("dashboard.totalSpent")}
+            </p>
+            <h4 className="text-xl sm:text-2xl font-black font-display tracking-tight text-white">
               {formatCurrency(totalSpent, currency, i18n.language)}
+            </h4>
+          </div>
+        </motion.div>
+
+        {/* Card 4: Orange ("Chhal Bqa Lik") */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="relative overflow-hidden bg-gradient-to-br from-amber-400 to-orange-500 text-white p-6 rounded-3xl shadow-lg shadow-orange-500/10 flex flex-col justify-between h-[140px] group"
+        >
+          <div className="absolute -top-6 -right-6 w-24 h-24 bg-white/10 rounded-full blur-xl group-hover:scale-125 transition-transform" />
+          <div className="flex justify-between items-start">
+            <div className="p-2.5 bg-white/15 rounded-full backdrop-blur-md">
+              <Sparkles className="w-5 h-5 text-white stroke-[2.2]" />
+            </div>
+            <span className="text-[10px] font-black bg-white/20 px-2 py-0.5 rounded-lg font-mono text-white">
+              {remainingPercent.toFixed(0)}%
             </span>
           </div>
-        </div>
-      </motion.div>
+          <div className="space-y-1">
+            <p className="text-amber-100/80 text-[10px] font-extrabold uppercase tracking-widest font-display">
+              {i18n.language === "ar" ? "شحال بقى ليك تصرف" : "Chhal Bqa Lik Tasraf"}
+            </p>
+            <h4 className="text-xl sm:text-2xl font-black font-display tracking-tight text-white">
+              {formatCurrency(remaining, currency, i18n.language)}
+            </h4>
+          </div>
+        </motion.div>
+      </div>
 
       {/* Grid: 4 Core Categories + Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -268,7 +423,7 @@ export default function Dashboard() {
             </h3>
             <button
               onClick={handleAddExpenseClick}
-              className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-xs font-bold uppercase tracking-wider font-display transition-all shadow-md shadow-emerald-500/10 cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-2xl text-xs font-bold uppercase tracking-wider font-display transition-all shadow-md shadow-violet-500/10 cursor-pointer"
             >
               <Plus className="w-4 h-4 stroke-[2.2]" />
               <span>{t("dashboard.addExpense")}</span>
@@ -340,53 +495,116 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Chart Card */}
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-stone-200/50 dark:border-slate-850 shadow-sm flex flex-col justify-between">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-stone-500 dark:text-slate-400 mb-4 font-display">
-            {t("dashboard.budgetDistribution")}
-          </h3>
+        {/* Sidebar: Chart & Passive Incomes */}
+        <div className="space-y-8 lg:col-span-1">
+          {/* Chart Card */}
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-stone-200/50 dark:border-slate-850 shadow-sm flex flex-col justify-between">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-stone-500 dark:text-slate-400 mb-4 font-display">
+              {t("dashboard.budgetDistribution")}
+            </h3>
 
-          <div className="h-[230px] w-full flex items-center justify-center">
-            {chartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={chartData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={65}
-                    outerRadius={85}
-                    paddingAngle={3}
-                    dataKey="value"
-                  >
-                    {chartData.map((entry: any, index: number) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(value: any) => [`${value} ${currency}`, ""]}
-                    contentStyle={{ borderRadius: "12px", border: "1px solid #e2e8f0", fontFamily: "Inter" }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex flex-col items-center text-center gap-2.5 text-stone-400">
-                <TrendingUp className="w-8 h-8 text-stone-300 stroke-[1.5]" />
-                <span className="text-xs font-display">{t("common.noData")}</span>
-              </div>
-            )}
+            <div className="h-[230px] w-full flex items-center justify-center">
+              {chartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={chartData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={65}
+                      outerRadius={85}
+                      paddingAngle={3}
+                      dataKey="value"
+                    >
+                      {chartData.map((entry: any, index: number) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      formatter={(value: any) => [`${value} ${currency}`, ""]}
+                      contentStyle={{ borderRadius: "12px", border: "1px solid #e2e8f0", fontFamily: "Inter" }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex flex-col items-center text-center gap-2.5 text-stone-400">
+                  <TrendingUp className="w-8 h-8 text-stone-300 stroke-[1.5]" />
+                  <span className="text-xs font-display">{t("common.noData")}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Simple Chart Legend */}
+            <div className="grid grid-cols-2 gap-2 text-xs pt-4 border-t border-stone-100 dark:border-slate-800 mt-2">
+              {categories.map((c: any) => (
+                <div key={c.id} className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: c.colorHex }} />
+                  <span className="truncate text-stone-600 dark:text-slate-400 font-bold font-display tracking-wide text-[11px]">
+                    {getCategoryName(c.nameKey, t)}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Simple Chart Legend */}
-          <div className="grid grid-cols-2 gap-2 text-xs pt-4 border-t border-stone-100 dark:border-slate-800 mt-2">
-            {categories.map((c: any) => (
-              <div key={c.id} className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: c.colorHex }} />
-                <span className="truncate text-stone-600 dark:text-slate-400 font-bold font-display tracking-wide text-[11px]">
-                  {getCategoryName(c.nameKey, t)}
-                </span>
-              </div>
-            ))}
+          {/* Passive Incomes Card */}
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-stone-200/50 dark:border-slate-850 shadow-sm flex flex-col gap-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-stone-500 dark:text-slate-400 font-display">
+                {t("dashboard.passiveIncome")}
+              </h3>
+              <button
+                onClick={handleOpenAddPassiveIncome}
+                className="p-1.5 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-950/40 rounded-xl transition-all cursor-pointer flex items-center justify-center"
+                title="Add Passive Income"
+              >
+                <Plus className="w-4 h-4 stroke-[2.5]" />
+              </button>
+            </div>
+
+            <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1">
+              {data?.monthlyBudget?.passiveIncomes && data.monthlyBudget.passiveIncomes.length > 0 ? (
+                data.monthlyBudget.passiveIncomes.map((pi: any) => (
+                  <div
+                    key={pi.id}
+                    className="flex justify-between items-center p-3 rounded-2xl bg-stone-50 dark:bg-slate-950/40 border border-stone-100 dark:border-slate-850 hover:bg-stone-100/50 dark:hover:bg-slate-950/65 transition-all group"
+                  >
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-stone-800 dark:text-slate-200 text-sm font-display leading-tight">
+                        {pi.name}
+                      </span>
+                      <span className="text-xs text-stone-400 dark:text-slate-500 font-mono mt-0.5">
+                        {formatCurrency(pi.amount, currency, i18n.language)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => handleOpenEditPassiveIncome(pi)}
+                        className="p-1 text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all cursor-pointer"
+                        title={t("common.edit")}
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (confirm(t("common.confirmDelete") || "Are you sure?")) {
+                            deletePassiveIncomeMutation.mutate(pi.id);
+                          }
+                        }}
+                        className="p-1 text-stone-400 hover:text-rose-500 transition-all cursor-pointer"
+                        title={t("common.delete")}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="py-6 text-center text-stone-400 dark:text-slate-500 text-xs">
+                  {t("dashboard.noPassiveIncome") || "No passive income items registered for this month."}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -399,22 +617,40 @@ export default function Dashboard() {
       >
         <form onSubmit={handleSaveBudget} className="space-y-4">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-              {t("dashboard.totalBudget")} ({currency})
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1 font-display">
+              {t("dashboard.initBudget")} ({currency})
             </label>
             <input
               type="number"
               required
               value={newBudgetAmount}
               onChange={(e) => setNewBudgetAmount(e.target.value)}
-              className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
               placeholder="10000"
             />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1 font-display">
+              {t("dashboard.passiveIncome")} ({currency})
+            </label>
+            <input
+              type="number"
+              disabled
+              value={newPassiveIncome}
+              className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-sm cursor-not-allowed"
+            />
+            <p className="text-[11px] text-gray-400 mt-1">
+              {i18n.language === "fr" 
+                ? "Calculé automatiquement à partir de la section des revenus passifs." 
+                : i18n.language === "ar" 
+                  ? "يتم حسابه تلقائياً من قسم الدخل السلبي." 
+                  : "Automatically calculated from the passive income section below."}
+            </p>
           </div>
           <button
             type="submit"
             disabled={updateBudgetMutation.isPending}
-            className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl transition-colors cursor-pointer"
+            className="w-full py-2.5 px-4 bg-violet-600 hover:bg-violet-700 text-white font-semibold text-sm rounded-xl transition-colors cursor-pointer"
           >
             {updateBudgetMutation.isPending ? t("common.loading") : t("common.save")}
           </button>
@@ -437,7 +673,7 @@ export default function Dashboard() {
               required
               value={expenseLabel}
               onChange={(e) => setExpenseLabel(e.target.value)}
-              className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
               placeholder="ex: Facture Eau Lydec"
             />
           </div>
@@ -452,7 +688,7 @@ export default function Dashboard() {
                 required
                 value={expenseAmount}
                 onChange={(e) => setExpenseAmount(e.target.value)}
-                className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
                 placeholder="400"
               />
             </div>
@@ -464,7 +700,7 @@ export default function Dashboard() {
               <select
                 value={expenseCatId}
                 onChange={(e) => setExpenseCatId(e.target.value)}
-                className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
               >
                 {categories.map((c: any) => (
                   <option key={c.id} value={c.id}>
@@ -484,16 +720,61 @@ export default function Dashboard() {
               required
               value={expenseDate}
               onChange={(e) => setExpenseDate(e.target.value)}
-              className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
             />
           </div>
 
           <button
             type="submit"
             disabled={addExpenseMutation.isPending}
-            className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl transition-colors cursor-pointer"
+            className="w-full py-2.5 px-4 bg-violet-600 hover:bg-violet-700 text-white font-semibold text-sm rounded-xl transition-colors cursor-pointer"
           >
             {addExpenseMutation.isPending ? t("common.loading") : t("common.add")}
+          </button>
+        </form>
+      </Dialog>
+
+      {/* DIALOG 3: Add/Edit Passive Income */}
+      <Dialog
+        isOpen={isPassiveIncomeModalOpen}
+        onClose={() => setIsPassiveIncomeModalOpen(false)}
+        title={editingPassiveIncome ? t("common.edit") : t("dashboard.addPassiveIncome") || "Add Passive Income"}
+      >
+        <form onSubmit={handleSavePassiveIncome} className="space-y-4">
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+              {t("common.name") || "Name"}
+            </label>
+            <input
+              type="text"
+              required
+              value={piName}
+              onChange={(e) => setPiName(e.target.value)}
+              className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+              placeholder="ex: Dividends, Rent, Side Hustle"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+              {t("common.amount")} ({currency})
+            </label>
+            <input
+              type="number"
+              required
+              value={piAmount}
+              onChange={(e) => setPiAmount(e.target.value)}
+              className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+              placeholder="2500"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={addPassiveIncomeMutation.isPending || updatePassiveIncomeMutation.isPending}
+            className="w-full py-2.5 px-4 bg-violet-600 hover:bg-violet-700 text-white font-semibold text-sm rounded-xl transition-colors cursor-pointer"
+          >
+            {addPassiveIncomeMutation.isPending || updatePassiveIncomeMutation.isPending ? t("common.loading") : t("common.save")}
           </button>
         </form>
       </Dialog>

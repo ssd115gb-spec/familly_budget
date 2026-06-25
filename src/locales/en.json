@@ -16,7 +16,9 @@
     "back": "Back",
     "close": "Close",
     "amount": "Amount",
-    "label": "Label"
+    "label": "Label",
+    "name": "Name",
+    "confirmDelete": "Are you sure you want to delete this item?"
   },
   "auth": {
     "login": "Login",
@@ -44,6 +46,8 @@
     "title": "Monthly Dashboard",
     "currentMonth": "Current Month",
     "totalBudget": "Total Monthly Budget",
+    "passiveIncome": "Passive Income",
+    "initBudget": "Initial Budget",
     "totalSpent": "Total Spent",
     "remainingBudget": "What's Left to Spend",
     "planned": "Planned",
@@ -54,6 +58,8 @@
     "addExpense": "Add Quick Expense",
     "editBudget": "Configure Monthly Budget",
     "budgetDistribution": "Planned Budget Distribution",
+    "addPassiveIncome": "Add Passive Income",
+    "noPassiveIncome": "No passive income items registered for this month.",
     "categories": {
       "category_bills": "Bills & Fixed Charges",
       "category_expenses": "Daily Expenses & Leisure",

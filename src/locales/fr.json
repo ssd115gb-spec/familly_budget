@@ -16,7 +16,9 @@
     "back": "Retour",
     "close": "Fermer",
     "amount": "Montant",
-    "label": "Libellé"
+    "label": "Libellé",
+    "name": "Nom",
+    "confirmDelete": "Voulez-vous vraiment supprimer cet élément ?"
   },
   "auth": {
     "login": "Connexion",
@@ -44,6 +46,8 @@
     "title": "Tableau de Bord Mensuel",
     "currentMonth": "Mois en Cours",
     "totalBudget": "Budget Mensuel Disponible",
+    "passiveIncome": "Revenu Passif",
+    "initBudget": "Budget Initial",
     "totalSpent": "Total Dépensé",
     "remainingBudget": "Chhal Bqa Lik Tasraf",
     "planned": "Prévu",
@@ -54,6 +58,8 @@
     "addExpense": "Ajouter une Dépense",
     "editBudget": "Configurer le Budget Mensuel",
     "budgetDistribution": "Répartition du Budget Prévu",
+    "addPassiveIncome": "Ajouter un Revenu Passif",
+    "noPassiveIncome": "Aucun revenu passif enregistré pour ce mois.",
     "categories": {
       "category_bills": "Factures & Charges Fixes",
       "category_expenses": "Dépenses Quotidiennes & Loisirs",

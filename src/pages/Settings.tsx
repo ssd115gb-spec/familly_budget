@@ -138,7 +138,7 @@ export default function Settings() {
       {/* Title */}
       <div>
         <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-3">
-          <SettingsIcon className="w-8 h-8 text-emerald-600" />
+          <SettingsIcon className="w-8 h-8 text-violet-600" />
           <span>{t("settings.title")}</span>
         </h1>
       </div>
@@ -158,7 +158,7 @@ export default function Settings() {
                 onClick={() => setTheme("light")}
                 className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-bold transition-all ${
                   theme === "light"
-                    ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-500 text-emerald-600 dark:text-emerald-400"
+                    ? "bg-violet-50 dark:bg-violet-950/20 border-violet-500 text-violet-600 dark:text-violet-400"
                     : "bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400"
                 }`}
               >
@@ -169,7 +169,7 @@ export default function Settings() {
                 onClick={() => setTheme("dark")}
                 className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-bold transition-all ${
                   theme === "dark"
-                    ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-500 text-emerald-600 dark:text-emerald-400"
+                    ? "bg-violet-50 dark:bg-violet-950/20 border-violet-500 text-violet-600 dark:text-violet-400"
                     : "bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400"
                 }`}
               >
@@ -180,7 +180,7 @@ export default function Settings() {
                 onClick={() => setTheme("system")}
                 className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-bold transition-all ${
                   theme === "system"
-                    ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-500 text-emerald-600 dark:text-emerald-400"
+                    ? "bg-violet-50 dark:bg-violet-950/20 border-violet-500 text-violet-600 dark:text-violet-400"
                     : "bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400"
                 }`}
               >
@@ -201,7 +201,7 @@ export default function Settings() {
                 onClick={() => changeLanguage("ar")}
                 className={`py-2.5 rounded-xl border text-xs font-bold transition-all ${
                   i18n.language === "ar"
-                    ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-500 text-emerald-600 dark:text-emerald-400"
+                    ? "bg-violet-50 dark:bg-violet-950/20 border-violet-500 text-violet-600 dark:text-violet-400"
                     : "bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400"
                 }`}
               >
@@ -211,7 +211,7 @@ export default function Settings() {
                 onClick={() => changeLanguage("fr")}
                 className={`py-2.5 rounded-xl border text-xs font-bold transition-all ${
                   i18n.language === "fr"
-                    ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-500 text-emerald-600 dark:text-emerald-400"
+                    ? "bg-violet-50 dark:bg-violet-950/20 border-violet-500 text-violet-600 dark:text-violet-400"
                     : "bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400"
                 }`}
               >
@@ -221,7 +221,7 @@ export default function Settings() {
                 onClick={() => changeLanguage("en")}
                 className={`py-2.5 rounded-xl border text-xs font-bold transition-all ${
                   i18n.language === "en"
-                    ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-500 text-emerald-600 dark:text-emerald-400"
+                    ? "bg-violet-50 dark:bg-violet-950/20 border-violet-500 text-violet-600 dark:text-violet-400"
                     : "bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400"
                 }`}
               >
@@ -244,7 +244,7 @@ export default function Settings() {
                   onClick={() => setCurrency(curr)}
                   className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all ${
                     currency === curr
-                      ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-500 text-emerald-600 dark:text-emerald-400"
+                      ? "bg-violet-50 dark:bg-violet-950/20 border-violet-500 text-violet-600 dark:text-violet-400"
                       : "bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400"
                   }`}
                 >
@@ -267,7 +267,7 @@ export default function Settings() {
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={handleBackupDownload}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-emerald-50 dark:bg-emerald-950/20 hover:bg-emerald-100 text-emerald-600 dark:text-emerald-400 font-bold text-xs rounded-xl cursor-pointer transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-violet-50 dark:bg-violet-950/20 hover:bg-violet-100/70 text-violet-600 dark:text-violet-400 font-bold text-xs rounded-xl cursor-pointer transition-colors"
               >
                 <Download className="w-4 h-4" />
                 <span>{t("settings.backup")}</span>
@@ -294,7 +294,7 @@ export default function Settings() {
               />
             </div>
             {restoreSuccessMsg && (
-              <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 text-center">
+              <p className="text-xs font-bold text-violet-600 dark:text-violet-400 text-center">
                 {restoreSuccessMsg}
               </p>
             )}
@@ -315,7 +315,7 @@ export default function Settings() {
                   placeholder={t("auth.currentPassword")}
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="block w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="block w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-violet-500"
                 />
               </div>
 
@@ -326,12 +326,12 @@ export default function Settings() {
                   placeholder={t("auth.newPassword")}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="block w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="block w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-violet-500"
                 />
               </div>
 
               {passwordSuccess && (
-                <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                <p className="text-xs font-bold text-violet-600 dark:text-violet-400">
                   Mot de passe mis à jour !
                 </p>
               )}
@@ -344,7 +344,7 @@ export default function Settings() {
               <button
                 type="submit"
                 disabled={changePasswordMutation.isPending}
-                className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer disabled:bg-emerald-500/50"
+                className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer disabled:bg-violet-500/50"
               >
                 {changePasswordMutation.isPending ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -390,7 +390,7 @@ export default function Settings() {
 
           <div>
             <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
-              Pour confirmer, veuillez saisir votre adresse e-mail de connexion (<strong className="font-sans text-emerald-600 dark:text-emerald-400">{user?.email}</strong>) :
+              Pour confirmer, veuillez saisir votre adresse e-mail de connexion (<strong className="font-sans text-violet-600 dark:text-violet-400">{user?.email}</strong>) :
             </label>
             <input
               type="text"

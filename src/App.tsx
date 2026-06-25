@@ -29,7 +29,7 @@ const queryClient = new QueryClient({
 function AppContent() {
   const { user, setSession, clearSession } = useAppStore();
   const [sessionRestored, setSessionRestored] = useState(false);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // Attempt silent session restoration on app boot
   useEffect(() => {
@@ -65,17 +65,20 @@ function AppContent() {
 
   if (!sessionRestored) {
     return (
-      <div className="h-screen w-screen flex flex-col justify-center items-center gap-3 bg-gray-50 dark:bg-gray-900 text-gray-500">
-        <Loader2 className="w-10 h-10 animate-spin text-emerald-600" />
+      <div className="h-screen w-screen flex flex-col justify-center items-center gap-3 bg-white dark:bg-gray-900 text-gray-500">
+        <Loader2 className="w-10 h-10 animate-spin text-violet-600" />
         <span className="text-sm font-semibold">{t("common.loading")}</span>
       </div>
     );
   }
 
+  const isRtl = i18n.language === "ar";
+  const userLoggedIn = !!user;
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900/40 text-gray-900 dark:text-gray-100 flex flex-col transition-colors duration-200">
+    <div className="min-h-screen bg-white dark:bg-slate-950 text-gray-900 dark:text-gray-100 flex flex-col transition-colors duration-200">
       <Header />
-      <main className="flex-grow">
+      <main className={`flex-grow min-w-0 transition-all duration-300 ${userLoggedIn ? (isRtl ? "md:pr-64 md:pl-0" : "md:pl-64 md:pr-0") : ""}`}>
         <Routes>
           {/* Guest Routes */}
           <Route

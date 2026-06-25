@@ -258,17 +258,27 @@ app.get("/api/budgets/stats", authenticateToken, async (req: any, res: any) => {
       where: {
         userId_year_month: { userId, year, month },
       },
+      include: {
+        passiveIncomes: true,
+      },
     });
 
     // Default configuration: lookup previous month budget or fallback to 10000 DH
     if (!budget) {
       let defaultAmount = 10000;
+      let defaultPassiveIncome = 0;
+      let prevPassiveIncomes: any[] = [];
+      
       const prevBudget = await prisma.monthlyBudget.findFirst({
         where: { userId },
         orderBy: [{ year: "desc" }, { month: "desc" }],
       });
       if (prevBudget) {
         defaultAmount = prevBudget.totalBudgetAmount;
+        defaultPassiveIncome = prevBudget.passiveIncome || 0;
+        prevPassiveIncomes = await prisma.passiveIncome.findMany({
+          where: { monthlyBudgetId: prevBudget.id }
+        });
       }
 
       budget = await prisma.monthlyBudget.create({
@@ -277,6 +287,16 @@ app.get("/api/budgets/stats", authenticateToken, async (req: any, res: any) => {
           year,
           month,
           totalBudgetAmount: defaultAmount,
+          passiveIncome: defaultPassiveIncome,
+          passiveIncomes: {
+            create: prevPassiveIncomes.map(pi => ({
+              name: pi.name,
+              amount: pi.amount
+            }))
+          }
+        },
+        include: {
+          passiveIncomes: true,
         },
       });
     }
@@ -330,24 +350,163 @@ app.put("/api/budgets/amount", authenticateToken, async (req: any, res: any) => 
       return res.status(400).json({ error: "Year, month, and totalBudgetAmount are required" });
     }
 
+    // Find the existing budget to calculate its passive income items sum
+    const existingBudget = await prisma.monthlyBudget.findUnique({
+      where: {
+        userId_year_month: { userId, year, month },
+      },
+      include: {
+        passiveIncomes: true,
+      },
+    });
+
+    const computedPassive = existingBudget
+      ? existingBudget.passiveIncomes.reduce((sum, pi) => sum + pi.amount, 0)
+      : 0.0;
+
     const budget = await prisma.monthlyBudget.upsert({
       where: {
         userId_year_month: { userId, year, month },
       },
       update: {
         totalBudgetAmount: parseFloat(totalBudgetAmount),
+        passiveIncome: computedPassive,
       },
       create: {
         userId,
         year,
         month,
         totalBudgetAmount: parseFloat(totalBudgetAmount),
+        passiveIncome: computedPassive,
       },
     });
 
     res.json(budget);
   } catch (error: any) {
     res.status(500).json({ error: "Server error updating budget amount" });
+  }
+});
+
+// Add passive income item
+app.post("/api/budgets/passive-income", authenticateToken, async (req: any, res: any) => {
+  try {
+    const userId = req.user.userId;
+    const { monthlyBudgetId, name, amount } = req.body;
+
+    if (!monthlyBudgetId || !name || amount === undefined) {
+      return res.status(400).json({ error: "Monthly Budget ID, name, and amount are required" });
+    }
+
+    // Verify monthlyBudget belongs to this user
+    const mb = await prisma.monthlyBudget.findUnique({ where: { id: monthlyBudgetId } });
+    if (!mb || mb.userId !== userId) {
+      return res.status(403).json({ error: "Unauthorized access to this monthly budget" });
+    }
+
+    const item = await prisma.passiveIncome.create({
+      data: {
+        monthlyBudgetId,
+        name,
+        amount: parseFloat(amount),
+      }
+    });
+
+    // Recalculate total passive income for this monthly budget
+    const allPassive = await prisma.passiveIncome.findMany({
+      where: { monthlyBudgetId }
+    });
+    const totalPassive = allPassive.reduce((sum, p) => sum + p.amount, 0);
+
+    await prisma.monthlyBudget.update({
+      where: { id: monthlyBudgetId },
+      data: { passiveIncome: totalPassive }
+    });
+
+    res.status(201).json(item);
+  } catch (error: any) {
+    console.error("Add passive income error:", error);
+    res.status(500).json({ error: "Server error creating passive income" });
+  }
+});
+
+// Update passive income item
+app.put("/api/budgets/passive-income/:id", authenticateToken, async (req: any, res: any) => {
+  try {
+    const userId = req.user.userId;
+    const { id } = req.params;
+    const { name, amount } = req.body;
+
+    if (!name || amount === undefined) {
+      return res.status(400).json({ error: "Name and amount are required" });
+    }
+
+    const pi = await prisma.passiveIncome.findUnique({
+      where: { id },
+      include: { monthlyBudget: true }
+    });
+
+    if (!pi || pi.monthlyBudget.userId !== userId) {
+      return res.status(403).json({ error: "Unauthorized access to this passive income" });
+    }
+
+    const updated = await prisma.passiveIncome.update({
+      where: { id },
+      data: {
+        name,
+        amount: parseFloat(amount)
+      }
+    });
+
+    // Recalculate total passive income
+    const allPassive = await prisma.passiveIncome.findMany({
+      where: { monthlyBudgetId: pi.monthlyBudgetId }
+    });
+    const totalPassive = allPassive.reduce((sum, p) => sum + p.amount, 0);
+
+    await prisma.monthlyBudget.update({
+      where: { id: pi.monthlyBudgetId },
+      data: { passiveIncome: totalPassive }
+    });
+
+    res.json(updated);
+  } catch (error: any) {
+    console.error("Update passive income error:", error);
+    res.status(500).json({ error: "Server error updating passive income" });
+  }
+});
+
+// Delete passive income item
+app.delete("/api/budgets/passive-income/:id", authenticateToken, async (req: any, res: any) => {
+  try {
+    const userId = req.user.userId;
+    const { id } = req.params;
+
+    const pi = await prisma.passiveIncome.findUnique({
+      where: { id },
+      include: { monthlyBudget: true }
+    });
+
+    if (!pi || pi.monthlyBudget.userId !== userId) {
+      return res.status(403).json({ error: "Unauthorized access to this passive income" });
+    }
+
+    await prisma.passiveIncome.delete({ where: { id } });
+
+    // Recalculate total passive income
+    const allPassive = await prisma.passiveIncome.findMany({
+      where: { monthlyBudgetId: pi.monthlyBudgetId }
+    });
+    const totalPassive = allPassive.reduce((sum, p) => sum + p.amount, 0);
+
+    await prisma.monthlyBudget.update({
+      where: { id: pi.monthlyBudgetId },
+      data: { passiveIncome: totalPassive }
+    });
+
+    res.json({ success: true });
+  } catch (error: any) {
+    console.error("Delete passive income error:", error);
+    res.status(500).json({ error: "Server error deleting passive income" });
   }
 });
 
@@ -711,7 +870,7 @@ app.get("/api/history", authenticateToken, async (req: any, res: any) => {
       const monthIndex = i + 1;
       const budgetForMonth = budgets.find((b) => b.month === monthIndex);
 
-      const monthBudgetAmount = budgetForMonth ? budgetForMonth.totalBudgetAmount : 0;
+      const monthBudgetAmount = budgetForMonth ? (budgetForMonth.totalBudgetAmount + (budgetForMonth.passiveIncome || 0)) : 0;
       let totalSpent = 0;
 
       const categoriesSpent: Record<string, { planned: number; spent: number }> = {};
@@ -770,7 +929,7 @@ app.get("/api/export/csv", authenticateToken, async (req: any, res: any) => {
 
     for (let m = 1; m <= 12; m++) {
       const b = budgets.find((x) => x.month === m);
-      const budgetAmount = b ? b.totalBudgetAmount : 0;
+      const budgetAmount = b ? (b.totalBudgetAmount + (b.passiveIncome || 0)) : 0;
       let totalSpent = 0;
 
       const cats = {

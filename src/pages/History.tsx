@@ -49,7 +49,7 @@ export default function History() {
   if (isLoading) {
     return (
       <div className="h-[60vh] flex flex-col justify-center items-center gap-3">
-        <Loader2 className="w-10 h-10 animate-spin text-emerald-600" />
+        <Loader2 className="w-10 h-10 animate-spin text-violet-600" />
         <span className="text-gray-500 font-medium text-sm">{t("common.loading")}</span>
       </div>
     );
@@ -113,7 +113,7 @@ export default function History() {
           {/* Export action */}
           <button
             onClick={handleExportCsv}
-            className="flex items-center gap-2 px-4.5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider font-display rounded-2xl shadow-sm cursor-pointer transition-all shadow-emerald-500/10"
+            className="flex items-center gap-2 px-4.5 py-3 bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs uppercase tracking-wider font-display rounded-2xl shadow-sm cursor-pointer transition-all shadow-violet-500/10"
           >
             <Download className="w-4 h-4 stroke-[2.2]" />
             <span>{t("history.exportCsv")}</span>

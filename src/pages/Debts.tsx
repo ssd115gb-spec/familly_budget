@@ -178,7 +178,7 @@ export default function Debts() {
   if (isLoading) {
     return (
       <div className="h-[60vh] flex flex-col justify-center items-center gap-3">
-        <Loader2 className="w-10 h-10 animate-spin text-emerald-600" />
+        <Loader2 className="w-10 h-10 animate-spin text-violet-600" />
         <span className="text-gray-500 font-medium text-sm">{t("common.loading")}</span>
       </div>
     );
@@ -192,14 +192,14 @@ export default function Debts() {
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-3">
-            <CreditCard className="w-8 h-8 text-emerald-600" />
+            <CreditCard className="w-8 h-8 text-violet-600" />
             <span>{t("debts.title")}</span>
           </h1>
         </div>
 
         <button
           onClick={() => setIsAddDebtOpen(true)}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-emerald-500/15 cursor-pointer self-start sm:self-auto"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-violet-500/15 cursor-pointer self-start sm:self-auto"
         >
           <Plus className="w-5 h-5" />
           <span>{t("debts.addDebt")}</span>
@@ -234,7 +234,7 @@ export default function Debts() {
                   <div className="flex items-center gap-1 shrink-0">
                     <button
                       onClick={() => handleEditClick(debt)}
-                      className="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                      className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
@@ -269,13 +269,13 @@ export default function Debts() {
                   {/* Meter bar */}
                   <div className="w-full bg-stone-100 h-3 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-emerald-600 rounded-full transition-all duration-500"
+                      className="h-full bg-violet-600 rounded-full transition-all duration-500"
                       style={{ width: `${Math.min(100, progressPercent)}%` }}
                     />
                   </div>
 
                   <div className="flex justify-between items-center text-xs">
-                    <span className="font-black text-emerald-600">
+                    <span className="font-black text-violet-600">
                       {progressPercent.toFixed(0)}% {t("debts.paymentProgress")}
                     </span>
                     <span className="text-stone-400">
@@ -287,7 +287,7 @@ export default function Debts() {
                 {/* Record payment trigger */}
                 <button
                   onClick={() => handleRecordPaymentClick(debt)}
-                  className="w-full mt-4 flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100/70 text-xs font-bold transition-colors cursor-pointer"
+                  className="w-full mt-4 flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-violet-50 text-violet-700 hover:bg-violet-100/70 dark:bg-violet-950/20 dark:text-violet-300 text-xs font-bold transition-colors cursor-pointer"
                 >
                   <PiggyBank className="w-4 h-4" />
                   <span>{t("debts.recordPayment")}</span>
@@ -323,7 +323,7 @@ export default function Debts() {
               required
               value={debtName}
               onChange={(e) => setDebtName(e.target.value)}
-              className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
               placeholder="ex: Crédit Immobilier"
             />
           </div>
@@ -338,7 +338,7 @@ export default function Debts() {
                 required
                 value={debtInstallment}
                 onChange={(e) => setDebtInstallment(e.target.value)}
-                className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
                 placeholder="2500"
               />
             </div>
@@ -351,7 +351,7 @@ export default function Debts() {
                 required
                 value={debtRemaining}
                 onChange={(e) => setDebtRemaining(e.target.value)}
-                className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
                 placeholder="150000"
               />
             </div>
@@ -365,7 +365,7 @@ export default function Debts() {
               type="number"
               value={debtTotal}
               onChange={(e) => setDebtTotal(e.target.value)}
-              className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
               placeholder="ex: 200000"
             />
           </div>
@@ -380,7 +380,7 @@ export default function Debts() {
                 required
                 value={debtStart}
                 onChange={(e) => setDebtStart(e.target.value)}
-                className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
               />
             </div>
             <div>
@@ -391,7 +391,7 @@ export default function Debts() {
                 type="date"
                 value={debtEnd}
                 onChange={(e) => setDebtEnd(e.target.value)}
-                className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
               />
             </div>
           </div>
@@ -399,7 +399,7 @@ export default function Debts() {
           <button
             type="submit"
             disabled={addDebtMutation.isPending}
-            className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl transition-colors cursor-pointer"
+            className="w-full py-2.5 px-4 bg-violet-600 hover:bg-violet-700 text-white font-semibold text-sm rounded-xl transition-colors cursor-pointer"
           >
             {addDebtMutation.isPending ? t("common.loading") : t("common.add")}
           </button>
@@ -422,7 +422,7 @@ export default function Debts() {
               required
               value={debtName}
               onChange={(e) => setDebtName(e.target.value)}
-              className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
             />
           </div>
 
@@ -436,7 +436,7 @@ export default function Debts() {
                 required
                 value={debtInstallment}
                 onChange={(e) => setDebtInstallment(e.target.value)}
-                className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
               />
             </div>
             <div>
@@ -448,7 +448,7 @@ export default function Debts() {
                 required
                 value={debtRemaining}
                 onChange={(e) => setDebtRemaining(e.target.value)}
-                className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
               />
             </div>
           </div>
@@ -461,7 +461,7 @@ export default function Debts() {
               type="number"
               value={debtTotal}
               onChange={(e) => setDebtTotal(e.target.value)}
-              className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
             />
           </div>
 
@@ -475,7 +475,7 @@ export default function Debts() {
                 required
                 value={debtStart}
                 onChange={(e) => setDebtStart(e.target.value)}
-                className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
               />
             </div>
             <div>
@@ -486,7 +486,7 @@ export default function Debts() {
                 type="date"
                 value={debtEnd}
                 onChange={(e) => setDebtEnd(e.target.value)}
-                className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
               />
             </div>
           </div>
@@ -494,7 +494,7 @@ export default function Debts() {
           <button
             type="submit"
             disabled={editDebtMutation.isPending}
-            className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl transition-colors cursor-pointer"
+            className="w-full py-2.5 px-4 bg-violet-600 hover:bg-violet-700 text-white font-semibold text-sm rounded-xl transition-colors cursor-pointer"
           >
             {editDebtMutation.isPending ? t("common.loading") : t("common.save")}
           </button>
@@ -545,7 +545,7 @@ export default function Debts() {
               required
               value={paymentAmount}
               onChange={(e) => setPaymentAmount(e.target.value)}
-              className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
             />
           </div>
 
@@ -559,7 +559,7 @@ export default function Debts() {
                 required
                 value={paymentYear}
                 onChange={(e) => setPaymentYear(e.target.value)}
-                className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
               />
             </div>
             <div>
@@ -573,7 +573,7 @@ export default function Debts() {
                 required
                 value={paymentMonth}
                 onChange={(e) => setPaymentMonth(e.target.value)}
-                className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="block w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-950 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
               />
             </div>
           </div>
@@ -581,7 +581,7 @@ export default function Debts() {
           <button
             type="submit"
             disabled={recordPaymentMutation.isPending}
-            className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl transition-colors cursor-pointer"
+            className="w-full py-2.5 px-4 bg-violet-600 hover:bg-violet-700 text-white font-semibold text-sm rounded-xl transition-colors cursor-pointer"
           >
             {recordPaymentMutation.isPending ? t("common.loading") : t("common.save")}
           </button>

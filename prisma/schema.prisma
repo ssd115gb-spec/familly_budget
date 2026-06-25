@@ -32,15 +32,25 @@ model Category {
 }
 
 model MonthlyBudget {
-  id                String       @id @default(uuid())
+  id                String          @id @default(uuid())
   userId            String
-  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   year              Int
-  month             Int          // 1 to 12
-  totalBudgetAmount Float        // default configurable budget (e.g. 10000)
+  month             Int             // 1 to 12
+  totalBudgetAmount Float           // default configurable budget (e.g. 10000)
+  passiveIncome     Float           @default(0.0)
   budgetLines       BudgetLine[]
+  passiveIncomes    PassiveIncome[]
 
   @@unique([userId, year, month])
+}
+
+model PassiveIncome {
+  id              String        @id @default(uuid())
+  monthlyBudgetId String
+  monthlyBudget   MonthlyBudget @relation(fields: [monthlyBudgetId], references: [id], onDelete: Cascade)
+  name            String
+  amount          Float
 }
 
 model BudgetLine {
