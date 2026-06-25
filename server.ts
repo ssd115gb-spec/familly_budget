@@ -447,6 +447,7 @@ async function checkBudgetLineThreshold(userId: string, line: any) {
       select: {
         notifyBudgetThreshold: true,
         budgetThresholdPercent: true,
+        language: true,
       }
     });
     if (!user || !user.notifyBudgetThreshold) return;
@@ -457,19 +458,20 @@ async function checkBudgetLineThreshold(userId: string, line: any) {
 
     const ratio = (actual / planned) * 100;
     const threshold = user.budgetThresholdPercent;
+    const lang = (user.language as 'en' | 'fr' | 'ar') || 'fr';
 
     if (ratio >= 100) {
       await createNotification(
         userId,
-        `⚠️ Budget Exceeded: ${line.label}`,
-        `You have exceeded your planned budget for "${line.label}". Planned: ${planned}, Actual: ${actual}.`,
+        `${translations[lang].budgetExceeded}${line.label}`,
+        `${translations[lang].budgetExceededMessage}"${line.label}". Planned: ${planned}, Actual: ${actual}.`,
         "BUDGET_WARNING"
       );
     } else if (ratio >= threshold) {
       await createNotification(
         userId,
-        `🔔 Budget Warning: ${line.label}`,
-        `You have reached ${ratio.toFixed(0)}% of your planned budget for "${line.label}". Planned: ${planned}, Actual: ${actual}.`,
+        `${translations[lang].budgetWarning}${line.label}`,
+        `${translations[lang].budgetWarningMessage}${ratio.toFixed(0)}${translations[lang].budgetWarningPercent}"${line.label}". Planned: ${planned}, Actual: ${actual}.`,
         "BUDGET_WARNING"
       );
     }
@@ -478,11 +480,47 @@ async function checkBudgetLineThreshold(userId: string, line: any) {
   }
 }
 
+const translations = {
+  en: {
+    debtPaymentDue: "Debt Payment Due: ",
+    budgetExceeded: "Budget Exceeded: ",
+    budgetExceededMessage: "You have exceeded your planned budget for ",
+    budgetWarning: "Budget Warning: ",
+    budgetWarningMessage: "You have reached ",
+    budgetWarningPercent: "% of your planned budget for ",
+    monthlySummary: "Monthly Budget Summary",
+    monthlySummaryMessage: "Your budget for ",
+    months: ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+  },
+  fr: {
+    debtPaymentDue: "Paiement de dette dû : ",
+    budgetExceeded: "Budget dépassé : ",
+    budgetExceededMessage: "Vous avez dépassé votre budget prévu pour ",
+    budgetWarning: "Avertissement de budget : ",
+    budgetWarningMessage: "Vous avez atteint ",
+    budgetWarningPercent: "% de votre budget prévu pour ",
+    monthlySummary: "Résumé du budget mensuel",
+    monthlySummaryMessage: "Votre budget pour ",
+    months: ["", "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"],
+  },
+  ar: {
+    debtPaymentDue: "استحقاق سداد الدين: ",
+    budgetExceeded: "تم تجاوز الميزانية: ",
+    budgetExceededMessage: "لقد تجاوزت ميزانيتك المخططة لـ ",
+    budgetWarning: "تنبيه الميزانية: ",
+    budgetWarningMessage: "لقد وصلت إلى ",
+    budgetWarningPercent: "% من ميزانيتك المخططة لـ ",
+    monthlySummary: "ملخص الميزانية الشهرية",
+    monthlySummaryMessage: "ميزانيتك لـ ",
+    months: ["", "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"],
+  }
+};
+
 async function checkDebtReminders(userId: string) {
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { notifyUpcomingDebts: true }
+      select: { notifyUpcomingDebts: true, language: true }
     });
     if (!user || !user.notifyUpcomingDebts) return;
 
@@ -504,7 +542,8 @@ async function checkDebtReminders(userId: string) {
 
     for (const debt of debts) {
       if (debt.remainingAmount > 0 && debt.payments.length === 0) {
-        const notificationTitle = `Debt Payment Due: ${debt.name}`;
+        const lang = (user.language as 'en' | 'fr' | 'ar') || 'fr';
+        const notificationTitle = `${translations[lang].debtPaymentDue}${debt.name}`;
         const existing = await prisma.notification.findFirst({
           where: {
             userId,
@@ -534,7 +573,7 @@ async function checkMonthlySummaryNotification(userId: string, year: number, mon
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { notifyMonthlySummary: true }
+      select: { notifyMonthlySummary: true, language: true }
     });
     if (!user || !user.notifyMonthlySummary) return;
 
@@ -564,10 +603,10 @@ async function checkMonthlySummaryNotification(userId: string, year: number, mon
       
       if (totalPlanned > 0) {
         const percent = (totalSpent / totalPlanned) * 100;
-        const monthNames = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        const monthName = monthNames[prevMonth] || prevMonth.toString();
+        const lang = (user.language as 'en' | 'fr' | 'ar') || 'fr';
+        const monthName = translations[lang].months[prevMonth] || prevMonth.toString();
         
-        const title = `Monthly Summary: ${monthName} ${prevYear}`;
+        const title = `${translations[lang].monthlySummary}: ${monthName} ${prevYear}`;
         const existing = await prisma.notification.findFirst({
           where: { userId, title }
         });
@@ -1435,7 +1474,7 @@ app.get("/api/user/backup", authenticateToken, async (req: any, res: any) => {
     const categories = await prisma.category.findMany({ where: { userId } });
     const budgets = await prisma.monthlyBudget.findMany({
       where: { userId },
-      include: { budgetLines: true },
+      include: { budgetLines: true, passiveIncomes: true },
     });
     const debts = await prisma.debt.findMany({
       where: { userId },
@@ -1491,6 +1530,7 @@ app.post("/api/user/restore", authenticateToken, async (req: any, res: any) => {
           year: b.year,
           month: b.month,
           totalBudgetAmount: b.totalBudgetAmount,
+          passiveIncome: b.passiveIncome,
         },
       });
 
@@ -1505,6 +1545,19 @@ app.post("/api/user/restore", authenticateToken, async (req: any, res: any) => {
               plannedAmount: line.plannedAmount,
               actualAmount: line.actualAmount,
               date: new Date(line.date),
+            },
+          });
+        }
+      }
+
+      if (b.passiveIncomes && b.passiveIncomes.length > 0) {
+        for (const pi of b.passiveIncomes) {
+          await prisma.passiveIncome.create({
+            data: {
+              id: pi.id,
+              monthlyBudgetId: pi.monthlyBudgetId,
+              name: pi.name,
+              amount: pi.amount,
             },
           });
         }

@@ -14,6 +14,7 @@ model User {
   passwordHash          String
   createdAt             DateTime        @default(now())
   initialSalary         Float           @default(10000.0)
+  language              String          @default("fr")
   notifyBudgetThreshold Boolean         @default(true)
   budgetThresholdPercent Float          @default(85.0)
   notifyUpcomingDebts   Boolean         @default(true)
