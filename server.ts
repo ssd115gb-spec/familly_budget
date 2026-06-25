@@ -638,6 +638,10 @@ app.get("/api/budgets/stats", authenticateToken, async (req: any, res: any) => {
       },
     });
 
+    const debts = await prisma.debt.findMany({
+      where: { userId },
+    });
+
     // Compute category details
     const categoryStats = categories.map((cat) => {
       const plannedSum = cat.budgetLines.reduce((acc, line) => acc + line.plannedAmount, 0);
@@ -662,6 +666,7 @@ app.get("/api/budgets/stats", authenticateToken, async (req: any, res: any) => {
     res.json({
       monthlyBudget: budget,
       categories: categoryStats,
+      debts: debts,
     });
   } catch (error: any) {
     console.error("Stats fetching error:", error);

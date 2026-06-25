@@ -292,7 +292,9 @@ export default function Dashboard() {
   const initBudget = data?.monthlyBudget?.totalBudgetAmount || 0;
   const passiveIncomesList = data?.monthlyBudget?.passiveIncomes || [];
   const passiveIncome = passiveIncomesList.reduce((acc: number, pi: any) => acc + (pi.amount || 0), 0);
-  const budget = initBudget + passiveIncome;
+  const debtsList = data?.debts || [];
+  const totalDebts = debtsList.reduce((acc: number, d: any) => acc + (d.monthlyInstallment || 0), 0);
+  const budget = initBudget + passiveIncome - totalDebts;
   const categories = data?.categories || [];
 
   // Calculate totals
